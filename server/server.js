@@ -14,6 +14,11 @@ mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('Connected to MongoDB'))
   .catch((err) => console.error('MongoDB connection error:', err));
 
+  //routes
+app.use('/api/products', require('./routes/products'));
+
+
+
 app.get('/', (req, res) => {
   res.send('Welcome to the E-commerce API!');
 });
