@@ -4,6 +4,7 @@
   padding: 10px;
   background-color: #f8f9fa;
   justify-content: center;
+  align-items: center;
 }
 
 .navbar a {
@@ -14,4 +15,22 @@
 
 .navbar a:hover {
   color: #0056b3;
+}
+
+.navbar span {
+  font-size: 18px;
+  color: #333;
+}
+
+.navbar button {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.navbar button:hover {
+  background-color: #c82333;
 }
