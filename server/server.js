@@ -18,9 +18,13 @@ mongoose.connect(process.env.MONGO_URI)
 app.use('/api/products', require('./routes/products'));
 app.use('/api/cart',require('./routes/cart'));
 app.use('/api/auth', require('./routes/auth'));
+app.use('/api/order', require('./routes/order'));
+
+
+
 
 app.get('/', (req, res) => {
-  res.send('Welcome to the E-commerce API!');
+  res.send('Welcome to the E-commerce !');
 });
 
 const PORT = process.env.PORT || 5000;

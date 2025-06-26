@@ -1,9 +1,11 @@
-
-import { useContext } from 'react';
+import React, { useContext } from 'react';
+import { Link } from 'react-router-dom';
+import { AuthContext } from '../context/AuthContext';
 import { CartContext } from '../context/CartContext';
 import '../styles/Cart.css';
 
 const Cart = () => {
+  const { user } = useContext(AuthContext);
   const { cart, updateQuantity, removeFromCart } = useContext(CartContext);
 
   const totalPrice = cart.reduce(
@@ -17,7 +19,7 @@ const Cart = () => {
 
   return (
     <div className="cart-container">
-      <h2>Your Cart</h2>
+      <h2>{user ? `${user.name}'s Cart` : 'Your Cart'}</h2>
       <div className="cart-items">
         {cart.map((item) => (
           <div key={item.productId} className="cart-item">
@@ -47,15 +49,11 @@ const Cart = () => {
         ))}
       </div>
       <h3>Total: ${totalPrice.toFixed(2)}</h3>
-      <button className="checkout-btn">Proceed to Checkout</button>
+      <Link to="/checkout" className="checkout-btn">
+        Proceed to Checkout
+      </Link>
     </div>
   );
 };
 
 export default Cart;
-
-
-
-
-
-

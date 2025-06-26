@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
+const jwt = require('jsonwebtoken');
 const Cart = require('../models/Cart');
 const Product = require('../models/Product');
-const jwt = require('jsonwebtoken');
 
 // Middleware to verify JWT
 const authMiddleware = (req, res, next) => {
@@ -39,6 +39,7 @@ router.get('/', async (req, res) => {
     await cart.populate('items.productId');
     res.json(cart);
   } catch (err) {
+    console.error('GET cart error:', err);
     res.status(500).json({ message: 'Server error', error: err.message });
   }
 });
@@ -47,6 +48,9 @@ router.get('/', async (req, res) => {
 router.post('/', async (req, res) => {
   const { productId, quantity, sessionId } = req.body;
   try {
+    if (!productId || !quantity || (!sessionId && !req.header('Authorization'))) {
+      return res.status(400).json({ message: 'Missing required fields' });
+    }
     const product = await Product.findById(productId);
     if (!product) {
       return res.status(404).json({ message: 'Product not found' });
@@ -78,8 +82,10 @@ router.post('/', async (req, res) => {
     cart.updatedAt = Date.now();
     await cart.save();
     await cart.populate('items.productId');
+    console.log('Cart updated:', cart);
     res.json(cart);
   } catch (err) {
+    console.error('POST cart error:', err);
     res.status(500).json({ message: 'Server error', error: err.message });
   }
 });
@@ -115,6 +121,7 @@ router.put('/:productId', async (req, res) => {
     await cart.populate('items.productId');
     res.json(cart);
   } catch (err) {
+    console.error('PUT cart error:', err);
     res.status(500).json({ message: 'Server error', error: err.message });
   }
 });
@@ -142,6 +149,56 @@ router.delete('/:productId', async (req, res) => {
     await cart.populate('items.productId');
     res.json(cart);
   } catch (err) {
+    console.error('DELETE cart error:', err);
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+});
+
+// POST merge guest cart with user cart
+router.post('/merge', authMiddleware, async (req, res) => {
+  const { sessionId } = req.body;
+  try {
+    const guestCart = sessionId ? await Cart.findOne({ sessionId }) : null;
+    let userCart = await Cart.findOne({ userId: req.userId });
+
+    if (!userCart) {
+      userCart = await Cart.create({ userId: req.userId, items: [] });
+    }
+
+    if (guestCart && guestCart.items.length > 0) {
+      for (const guestItem of guestCart.items) {
+        const product = await Product.findById(guestItem.productId);
+        if (!product || product.stock < guestItem.quantity) {
+          continue; // Skip invalid or out-of-stock items
+        }
+        const existingItem = userCart.items.find(
+          (item) => item.productId.toString() === guestItem.productId.toString()
+        );
+        if (existingItem) {
+          existingItem.quantity += guestItem.quantity;
+          if (existingItem.quantity > product.stock) {
+            existingItem.quantity = product.stock;
+          }
+        } else {
+          userCart.items.push({
+            productId: guestItem.productId,
+            quantity: guestItem.quantity
+          });
+        }
+      }
+      userCart.updatedAt = Date.now();
+      await userCart.save();
+      // Delete guest cart
+      if (guestCart) {
+        await Cart.deleteOne({ sessionId });
+      }
+    }
+
+    await userCart.populate('items.productId');
+    console.log('Merged cart:', userCart);
+    res.json(userCart);
+  } catch (err) {
+    console.error('Merge cart error:', err);
     res.status(500).json({ message: 'Server error', error: err.message });
   }
 });

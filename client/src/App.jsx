@@ -6,6 +6,8 @@ import ProductDetails from './pages/ProductDetails';
 import Cart from './pages/Cart';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import Checkout from './pages/Checkout';
+import Orders from './pages/Orders';
 import './App.css';
 
 function App() {
@@ -22,6 +24,7 @@ function App() {
       <nav className="navbar">
         <Link to="/">Home</Link>
         <Link to="/cart">Cart</Link>
+        <Link to="/orders">Orders</Link>
         {user ? (
           <>
             <span>Welcome, {user.name}</span>
@@ -41,6 +44,8 @@ function App() {
         <Route path="/cart" element={<Cart />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/checkout" element={<Checkout />} />
+        <Route path="/orders" element={<Orders />} />
       </Routes>
     </div>
   );
