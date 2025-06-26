@@ -24,7 +24,7 @@ const products = [
     name: 'Smartphone',
     price: 499.99,
     description: 'Latest smartphone with 5G support',
-    image: 'https://example.com/smartphone.jpg',
+    image: 'https://unsplash.com/photos/macbook-pro-on-top-of-brown-table-1SAnrIxw5OY',
     category: 'Electronics',
     stock: 20
   },
