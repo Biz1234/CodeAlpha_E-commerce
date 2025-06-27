@@ -1,14 +1,28 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import '../styles/Products.css';
 
 const Products = () => {
   const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('');
-  const categories = ['electronics', 'clothing', 'books']; // Adjust based on your products
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/api/products/categories');
+        if (!response.ok) throw new Error('Failed to fetch categories');
+        const data = await response.json();
+        setCategories(data);
+      } catch (err) {
+        setError(err.message);
+      }
+    };
+    fetchCategories();
+  }, []);
 
   useEffect(() => {
     const fetchProducts = async () => {
