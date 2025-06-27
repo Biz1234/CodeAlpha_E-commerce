@@ -23,7 +23,7 @@ const Cart = () => {
       <div className="cart-items">
         {cart.map((item) => (
           <div key={item.productId} className="cart-item">
-            <img src={item.product.image} alt={item.product.name} />
+            <img src={`http://localhost:5000${item.product.image}`} alt={item.product.name} />
             <div className="cart-item-details">
               <h3>{item.product.name}</h3>
               <p>Price: ${item.product.price.toFixed(2)}</p>

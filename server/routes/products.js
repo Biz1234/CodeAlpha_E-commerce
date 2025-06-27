@@ -1,6 +1,60 @@
 const express = require('express');
 const router = express.Router();
 const Product = require('../models/Product');
+const multer = require('multer');
+const path = require('path');
+
+// Configure multer for file uploads
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'uploads/');
+  },
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+    cb(null, `${file.fieldname}-${uniqueSuffix}${ext}`);
+  }
+});
+
+const upload = multer({
+  storage,
+  fileFilter: (req, file, cb) => {
+    const filetypes = /jpeg|jpg|png/;
+    const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+    const mimetype = filetypes.test(file.mimetype);
+    if (extname && mimetype) {
+      return cb(null, true);
+    }
+    cb(new Error('Only JPEG/PNG images are allowed'));
+  },
+  limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
+});
+
+// Serve static files from uploads folder
+router.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+
+// POST create product with image
+router.post('/', upload.single('image'), async (req, res) => {
+  try {
+    const { name, price, description, stock, category } = req.body;
+    if (!req.file) {
+      return res.status(400).json({ message: 'Image is required' });
+    }
+    const image = `/uploads/${req.file.filename}`;
+    const product = await Product.create({
+      name,
+      price,
+      description,
+      image,
+      stock,
+      category
+    });
+    res.status(201).json(product);
+  } catch (err) {
+    console.error('Create product error:', err);
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+});
 
 // GET all products with search and category filtering
 router.get('/', async (req, res) => {
@@ -16,7 +70,7 @@ router.get('/', async (req, res) => {
     }
 
     if (category) {
-      query.category = { $regex: `^${category}$`, $options: 'i' }; // Case-insensitive exact match
+      query.category = { $regex: `^${category}$`, $options: 'i' };
     }
 
     const products = await Product.find(query);

@@ -1,6 +1,4 @@
-
-
-import { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import '../styles/Orders.css';
@@ -52,7 +50,7 @@ const Orders = () => {
           <div className="order-items">
             {order.items.map((item) => (
               <div key={item.productId._id} className="order-item">
-                <img src={item.productId.image} alt={item.productId.name} />
+                <img src={`http://localhost:5000${item.productId.image}`} alt={item.productId.name} />
                 <div>
                   <h4>{item.productId.name}</h4>
                   <p>Price: ${item.price.toFixed(2)}</p>

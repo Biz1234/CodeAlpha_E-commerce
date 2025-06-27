@@ -1,5 +1,3 @@
-
-
 import React, { useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
@@ -37,7 +35,6 @@ const Checkout = () => {
         const errorData = await response.json();
         throw new Error(errorData.message || 'Failed to place order');
       }
-      const order = await response.json();
       alert('Order placed successfully!');
       navigate('/orders');
     } catch (err) {
@@ -58,7 +55,7 @@ const Checkout = () => {
       <div className="checkout-items">
         {cart.map((item) => (
           <div key={item.productId} className="checkout-item">
-            <img src={item.product.image} alt={item.product.name} />
+            <img src={`http://localhost:5000${item.product.image}`} alt={item.product.name} />
             <div>
               <h3>{item.product.name}</h3>
               <p>Price: ${item.product.price.toFixed(2)}</p>
@@ -81,4 +78,3 @@ const Checkout = () => {
 };
 
 export default Checkout;
-

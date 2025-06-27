@@ -1,0 +1,52 @@
+.add-product-container {
+  max-width: 500px;
+  margin: 20px auto;
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+.add-product-container h2 {
+  text-align: center;
+}
+
+.add-product-container form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.add-product-container label {
+  font-weight: bold;
+}
+
+.add-product-container input,
+.add-product-container textarea {
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  width: 100%;
+}
+
+.add-product-container button {
+  background-color: #28a745;
+  color: white;
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.add-product-container button:hover {
+  background-color: #218838;
+}
+
+.add-product-container button:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+}
+
+.error {
+  color: red;
+  text-align: center;
+}
