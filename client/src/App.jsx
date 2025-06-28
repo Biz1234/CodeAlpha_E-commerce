@@ -10,7 +10,7 @@ import Register from './pages/Register';
 import Checkout from './pages/Checkout';
 import Orders from './pages/Orders';
 import Profile from './pages/Profile';
-import AddProduct from './pages/AddProduct';
+import Admin from './pages/Admin';
 import './App.css';
 
 function App() {
@@ -34,7 +34,7 @@ function App() {
         </Link>
         <Link to="/orders">Orders</Link>
         <Link to="/profile">Profile</Link>
-        {user && <Link to="/add-product">Add Product</Link>}
+        {user && user.role === 'admin' && <Link to="/admin">Admin</Link>}
         {user ? (
           <>
             <span>Welcome, {user.name}</span>
@@ -57,7 +57,7 @@ function App() {
         <Route path="/checkout" element={<Checkout />} />
         <Route path="/orders" element={<Orders />} />
         <Route path="/profile" element={<Profile />} />
-        <Route path="/add-product" element={<AddProduct />} />
+        <Route path="/admin" element={<Admin />} />
       </Routes>
     </div>
   );

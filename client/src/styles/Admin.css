@@ -1,0 +1,85 @@
+.admin-container {
+  max-width: 1000px;
+  margin: 20px auto;
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+.admin-container h2,
+.admin-container h3 {
+  text-align: center;
+}
+
+.admin-container form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.admin-container label {
+  font-weight: bold;
+}
+
+.admin-container input,
+.admin-container textarea {
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  width: 100%;
+}
+
+.admin-container button {
+  background-color: #28a745;
+  color: white;
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.admin-container button:hover {
+  background-color: #218838;
+}
+
+.admin-container button:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+}
+
+.admin-container button:nth-child(2) {
+  background-color: #dc3545;
+}
+
+.admin-container button:nth-child(2):hover {
+  background-color: #c82333;
+}
+
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 20px;
+}
+
+.product-card {
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  padding: 15px;
+  text-align: center;
+}
+
+.product-card img {
+  max-width: 100%;
+  height: 150px;
+  object-fit: cover;
+}
+
+.product-card button {
+  margin: 5px;
+}
+
+.error {
+  color: red;
+  text-align: center;
+}
