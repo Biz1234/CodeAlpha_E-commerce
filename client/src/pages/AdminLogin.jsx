@@ -1,34 +1,43 @@
-import React, { useState, useContext } from 'react';
+import  { useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
-import '../styles/auth.css';
+import '../styles/AdminLogin.css';
 
-
-const Login = () => {
-  const { login } = useContext(AuthContext);
+const AdminLogin = () => {
+  const { user, login } = useContext(AuthContext);
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    console.log('AdminLogin useEffect - User:', user);
+    if (user && user.role === 'admin') {
+      console.log('Redirecting to /admin');
+      setTimeout(() => navigate('/admin', { replace: true }), 100);
+    }
+  }, [user, navigate]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
     try {
-      await login(email, password);
-      navigate('/'); // Redirect to home for regular users
+      console.log('AdminLogin - Attempting login with:', { email });
+      const userData = await login(email, password, '/api/auth/admin-login');
+      console.log('AdminLogin - Login response user:', userData);
     } catch (err) {
-      setError(err.message || 'Login failed');
+      console.error('AdminLogin - Error:', err.message);
+      setError(err.message || 'Admin login failed');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="login-container">
-      <h2>Login</h2>
+    <div className="admin-login-container">
+      <h2>Admin Login</h2>
       {error && <p className="error">{error}</p>}
       <form onSubmit={handleSubmit}>
         <div>
@@ -57,4 +66,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default AdminLogin;

@@ -3,6 +3,7 @@ const router = express.Router();
 const Product = require('../models/Product');
 const multer = require('multer');
 const path = require('path');
+const jwt = require('jsonwebtoken');
 
 // Middleware to check admin role
 const adminMiddleware = (req, res, next) => {
@@ -48,10 +49,10 @@ const upload = multer({
   limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
 });
 
-// Serve static files from uploads folder
+// Serve static files
 router.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
-// POST create product with image (admin only)
+// POST create product
 router.post('/', adminMiddleware, upload.single('image'), async (req, res) => {
   try {
     const { name, price, description, stock, category } = req.body;
@@ -74,13 +75,13 @@ router.post('/', adminMiddleware, upload.single('image'), async (req, res) => {
   }
 });
 
-// PUT update product (admin only)
+// PUT update product
 router.put('/:id', adminMiddleware, upload.single('image'), async (req, res) => {
   try {
     const { name, price, description, stock, category } = req.body;
     const updateData = { name, price, description, stock, category };
     if (req.file) {
-      updateData.image = `/uploads/${req.file.filename}`;
+      updateData.image = `/Uploads/${req.file.filename}`;
     }
     const product = await Product.findByIdAndUpdate(req.params.id, updateData, {
       new: true,
@@ -96,7 +97,7 @@ router.put('/:id', adminMiddleware, upload.single('image'), async (req, res) => 
   }
 });
 
-// DELETE product (admin only)
+// DELETE product
 router.delete('/:id', adminMiddleware, async (req, res) => {
   try {
     const product = await Product.findByIdAndDelete(req.params.id);
@@ -110,23 +111,20 @@ router.delete('/:id', adminMiddleware, async (req, res) => {
   }
 });
 
-// GET all products with search and category filtering
+// GET all products
 router.get('/', async (req, res) => {
   try {
     const { search, category } = req.query;
     const query = {};
-
     if (search) {
       query.$or = [
         { name: { $regex: search, $options: 'i' } },
         { description: { $regex: search, $options: 'i' } }
       ];
     }
-
     if (category) {
       query.category = { $regex: `^${category}$`, $options: 'i' };
     }
-
     const products = await Product.find(query);
     res.json(products);
   } catch (err) {
@@ -135,7 +133,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-// GET unique categories
+// GET categories
 router.get('/categories', async (req, res) => {
   try {
     const categories = await Product.distinct('category');
@@ -146,7 +144,7 @@ router.get('/categories', async (req, res) => {
   }
 });
 
-// GET single product by ID
+// GET single product
 router.get('/:id', async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);

@@ -6,9 +6,51 @@
   border-radius: 5px;
 }
 
-.admin-container h2,
-.admin-container h3 {
-  text-align: center;
+.admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.admin-header h2 {
+  margin: 0;
+}
+
+.admin-header button {
+  background-color: #dc3545;
+  color: white;
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.admin-header button:hover {
+  background-color: #c82333;
+}
+
+.tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.tabs button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  background-color: #f0f0f0;
+  cursor: pointer;
+}
+
+.tabs button.active {
+  background-color: #007bff;
+  color: white;
+}
+
+.tabs button:hover {
+  background-color: #e0e0e0;
 }
 
 .admin-container form {
@@ -23,7 +65,8 @@
 }
 
 .admin-container input,
-.admin-container textarea {
+.admin-container textarea,
+.admin-container select {
   padding: 10px;
   border: 1px solid #ddd;
   border-radius: 5px;
@@ -56,13 +99,15 @@
   background-color: #c82333;
 }
 
-.products-grid {
+.products-grid,
+.orders-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 20px;
 }
 
-.product-card {
+.product-card,
+.order-card {
   border: 1px solid #ddd;
   border-radius: 5px;
   padding: 15px;
@@ -75,8 +120,8 @@
   object-fit: cover;
 }
 
-.product-card button {
-  margin: 5px;
+.order-card select {
+  margin-top: 10px;
 }
 
 .error {
