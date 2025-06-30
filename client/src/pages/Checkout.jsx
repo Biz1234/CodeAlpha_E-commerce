@@ -6,7 +6,7 @@ import '../styles/Checkout.css';
 
 const Checkout = () => {
   const { user, token } = useContext(AuthContext);
-  const { cart } = useContext(CartContext);
+  const { cart, clearCart } = useContext(CartContext);
   const navigate = useNavigate();
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -16,26 +16,57 @@ const Checkout = () => {
     return null;
   }
 
-  const totalPrice = cart.reduce(
-    (total, item) => total + item.product.price * item.quantity,
-    0
-  );
+  // ✅ Calculate total amount safely
+  const totalPrice = cart.reduce((total, item) => {
+    const price = item.product?.price || 0;
+    const quantity = item.quantity || 0;
+    return total + price * quantity;
+  }, 0);
 
   const handleCheckout = async () => {
     setLoading(true);
+    setError(null);
+
     try {
+      // ✅ Ensure cart has items
+      if (!cart || cart.length === 0) {
+        throw new Error('Your cart is empty');
+      }
+
+      // ✅ Build products array
+      const products = cart.map((item) => ({
+        productId: item.product?._id,
+        quantity: item.quantity,
+        price: item.product?.price,
+      }));
+
+      // ✅ Make sure no undefined values are sent
+      for (const product of products) {
+        if (!product.productId || product.quantity <= 0 || isNaN(product.price)) {
+          throw new Error('Invalid product data in cart');
+        }
+      }
+
+      // ✅ Send request
       const response = await fetch('http://localhost:5000/api/order', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        }
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          products,
+          totalAmount: totalPrice, // ✅ Now correctly defined
+        }),
       });
+
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message || 'Failed to place order');
       }
+
       alert('Order placed successfully!');
+      clearCart();
       navigate('/orders');
     } catch (err) {
       setError(err.message);
@@ -44,27 +75,39 @@ const Checkout = () => {
     }
   };
 
-  if (cart.length === 0) {
-    return <div className="checkout-container"><h2>Your cart is empty</h2></div>;
+  if (!cart || cart.length === 0) {
+    return (
+      <div className="checkout-container">
+        <h2>Your cart is empty</h2>
+      </div>
+    );
   }
 
   return (
     <div className="checkout-container">
       <h2>Checkout</h2>
-      {error && <p className="error">{error}</p>}
+      {error && <p className="error">Error: {error}</p>}
+
       <div className="checkout-items">
-        {cart.map((item) => (
-          <div key={item.productId} className="checkout-item">
-            <img src={`http://localhost:5000${item.product.image}`} alt={item.product.name} />
+        {cart.map((item, index) => (
+          <div key={`${item.product._id}-${index}`} className="checkout-item">
+            <img
+              src={`http://localhost:5000${item.product.image}`}
+              alt={item.product.name}
+            />
             <div>
               <h3>{item.product.name}</h3>
-              <p>Price: ${item.product.price.toFixed(2)}</p>
+              <p>Price: ${item.product.price?.toFixed(2) || '0.00'}</p>
               <p>Quantity: {item.quantity}</p>
-              <p>Subtotal: ${(item.product.price * item.quantity).toFixed(2)}</p>
+              <p>
+                Subtotal: $
+                {(item.product.price * item.quantity).toFixed(2)}
+              </p>
             </div>
           </div>
         ))}
       </div>
+
       <h3>Total: ${totalPrice.toFixed(2)}</h3>
       <button
         onClick={handleCheckout}

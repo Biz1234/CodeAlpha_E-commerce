@@ -1,5 +1,3 @@
-
-
 import { useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
@@ -23,8 +21,8 @@ const Profile = () => {
     <div className="profile-container">
       <h2>User Profile</h2>
       <div className="profile-details">
-        <p><strong>Name:</strong> {user.name}</p>
-        <p><strong>Email:</strong> {user.email}</p>
+        <p><strong>Name:</strong> {user.name || 'N/A'}</p>
+        <p><strong>Email:</strong> {user.email || 'N/A'}</p>
         <button onClick={() => navigate('/orders')} className="orders-btn">
           View Orders
         </button>

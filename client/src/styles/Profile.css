@@ -1,40 +1,59 @@
-
-
+/* Profile.css */
 .profile-container {
-  max-width: 400px;
-  margin: 20px auto;
-  padding: 20px;
-  border: 1px solid #ddd;
-  border-radius: 5px;
+  max-width: 600px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background-color: var(--white);
+  border-radius: var(--border-radius);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  text-align: center;
 }
 
 .profile-container h2 {
-  text-align: center;
+  margin-bottom: 2rem;
+  font-size: 2rem;
+  color: var(--text-color);
 }
 
 .profile-details {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 1.5rem;
+  align-items: center;
+  text-align: center;
 }
 
-.orders-btn, .logout-btn {
-  background-color: #007bff;
-  color: white;
-  padding: 10px;
+.profile-details p {
+  font-size: 1.1rem;
+  color: var(--text-color);
+  margin: 0;
+}
+
+.orders-btn,
+.logout-btn {
+  padding: 0.6rem 1.5rem;
+  border-radius: var(--border-radius);
   border: none;
-  border-radius: 5px;
+  font-size: 1rem;
+  font-weight: 500;
   cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.orders-btn {
+  background-color: var(--primary-color);
+  color: var(--white);
 }
 
 .orders-btn:hover {
-  background-color: #0056b3;
+  background-color: #0b5ed7;
 }
 
 .logout-btn {
-  background-color: #dc3545;
+  background-color: var(--danger-color);
+  color: var(--white);
 }
 
 .logout-btn:hover {
-  background-color: #c82333;
+  background-color: #bb2d3b;
 }

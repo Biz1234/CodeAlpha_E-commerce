@@ -3,25 +3,6 @@ const router = express.Router();
 const Product = require('../models/Product');
 const multer = require('multer');
 const path = require('path');
-const jwt = require('jsonwebtoken');
-
-// Middleware to check admin role
-const adminMiddleware = (req, res, next) => {
-  const token = req.header('Authorization')?.replace('Bearer ', '');
-  if (!token) {
-    return res.status(401).json({ message: 'Authentication required' });
-  }
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    if (decoded.role !== 'admin') {
-      return res.status(403).json({ message: 'Admin access required' });
-    }
-    req.userId = decoded.userId;
-    next();
-  } catch (err) {
-    res.status(401).json({ message: 'Invalid token' });
-  }
-};
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
@@ -49,11 +30,11 @@ const upload = multer({
   limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
 });
 
-// Serve static files
+// Serve static files from uploads folder
 router.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
-// POST create product
-router.post('/', adminMiddleware, upload.single('image'), async (req, res) => {
+// POST create product with image
+router.post('/', upload.single('image'), async (req, res) => {
   try {
     const { name, price, description, stock, category } = req.body;
     if (!req.file) {
@@ -75,56 +56,23 @@ router.post('/', adminMiddleware, upload.single('image'), async (req, res) => {
   }
 });
 
-// PUT update product
-router.put('/:id', adminMiddleware, upload.single('image'), async (req, res) => {
-  try {
-    const { name, price, description, stock, category } = req.body;
-    const updateData = { name, price, description, stock, category };
-    if (req.file) {
-      updateData.image = `/Uploads/${req.file.filename}`;
-    }
-    const product = await Product.findByIdAndUpdate(req.params.id, updateData, {
-      new: true,
-      runValidators: true
-    });
-    if (!product) {
-      return res.status(404).json({ message: 'Product not found' });
-    }
-    res.json(product);
-  } catch (err) {
-    console.error('Update product error:', err);
-    res.status(500).json({ message: 'Server error', error: err.message });
-  }
-});
-
-// DELETE product
-router.delete('/:id', adminMiddleware, async (req, res) => {
-  try {
-    const product = await Product.findByIdAndDelete(req.params.id);
-    if (!product) {
-      return res.status(404).json({ message: 'Product not found' });
-    }
-    res.json({ message: 'Product deleted' });
-  } catch (err) {
-    console.error('Delete product error:', err);
-    res.status(500).json({ message: 'Server error', error: err.message });
-  }
-});
-
-// GET all products
+// GET all products with search and category filtering
 router.get('/', async (req, res) => {
   try {
     const { search, category } = req.query;
     const query = {};
+
     if (search) {
       query.$or = [
         { name: { $regex: search, $options: 'i' } },
         { description: { $regex: search, $options: 'i' } }
       ];
     }
+
     if (category) {
       query.category = { $regex: `^${category}$`, $options: 'i' };
     }
+
     const products = await Product.find(query);
     res.json(products);
   } catch (err) {
@@ -133,7 +81,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-// GET categories
+// GET unique categories
 router.get('/categories', async (req, res) => {
   try {
     const categories = await Product.distinct('category');
@@ -144,7 +92,7 @@ router.get('/categories', async (req, res) => {
   }
 });
 
-// GET single product
+// GET single product by ID
 router.get('/:id', async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);

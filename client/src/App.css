@@ -1,30 +1,94 @@
-.navbar {
-  display: flex;
-  gap: 20px;
-  padding: 10px;
-  background-color: #f8f9fa;
-  border-bottom: 1px solid #ddd;
+/* app.css - Global Styles */
+:root {
+  --primary-color: #0d6efd;
+  --secondary-color: #6c757d;
+  --accent-color: #ffc107;
+  --bg-color: #f8f9fa;
+  --text-color: #212529;
+  --white: #ffffff;
+  --danger-color: #dc3545;
+  --font-main: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  --border-radius: 8px;
+  --transition-speed: 0.3s;
 }
 
-.navbar a,
-.navbar button {
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+}
+
+body {
+  font-family: var(--font-main);
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  line-height: 1.6;
+  padding: 1rem;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+a {
   text-decoration: none;
-  color: #007bff;
-  padding: 5px 10px;
+  color: var(--primary-color);
+}
+
+button {
+  cursor: pointer;
+  font-family: inherit;
   border: none;
   background: none;
-  cursor: pointer;
+  padding: 0;
 }
 
-.navbar a:hover,
-.navbar button:hover {
-  color: #0056b3;
+button:focus,
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
 }
 
-.cart-badge {
-  background-color: #dc3545;
-  color: white;
-  border-radius: 50%;
-  padding: 2px 6px;
-  font-size: 0.8em;
+img {
+  max-width: 100%;
+  display: block;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+/* Utility Classes */
+.text-center {
+  text-align: center;
+}
+
+.btn {
+  display: inline-block;
+  background-color: var(--primary-color);
+  color: var(--white);
+  padding: 0.5rem 1rem;
+  border-radius: var(--border-radius);
+  transition: background-color var(--transition-speed);
+  font-weight: 500;
+}
+
+.btn:hover {
+  background-color: #0b5ed7;
+}
+
+.btn-danger {
+  background-color: var(--danger-color);
+}
+
+.btn-danger:hover {
+  background-color: #bb2d3b;
 }

@@ -10,6 +10,7 @@ export const CartProvider = ({ children }) => {
     const savedCart = localStorage.getItem('cart');
     return savedCart ? JSON.parse(savedCart) : [];
   });
+
   const [sessionId] = useState(() => localStorage.getItem('sessionId') || uuidv4());
 
   useEffect(() => {
@@ -18,43 +19,46 @@ export const CartProvider = ({ children }) => {
   }, [cart, sessionId]);
 
   useEffect(() => {
-    // Fetch user cart or sync guest cart on login
     const fetchOrSyncCart = async () => {
       if (user && token) {
         try {
-          // Merge guest cart with user cart
           if (cart.length > 0) {
-            await fetch('http://localhost:5000/api/cart/merge', {
+            const mergeRes = await fetch('http://localhost:5000/api/cart/merge', {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
-                Authorization: `Bearer ${token}`
+                Authorization: `Bearer ${token}`,
               },
-              body: JSON.stringify({ sessionId })
-            }).then((res) => {
-              if (!res.ok) throw new Error('Failed to merge cart');
-              return res.json();
-            }).then((mergedCart) => {
-              setCart(mergedCart.items.map((item) => ({
+              body: JSON.stringify({ sessionId }),
+            });
+
+            if (!mergeRes.ok) throw new Error('Failed to merge cart');
+            const mergedCart = await mergeRes.json();
+            setCart(
+              mergedCart.items.map((item) => ({
+                itemId: uuidv4(), // Unique ID per cart item
                 productId: item.productId._id,
                 product: item.productId,
-                quantity: item.quantity
-              })));
-              localStorage.removeItem('cart');
-              localStorage.removeItem('sessionId');
-            });
+                quantity: item.quantity,
+              }))
+            );
+            localStorage.removeItem('cart');
+            localStorage.removeItem('sessionId');
           } else {
-            // Fetch user cart
             const response = await fetch('http://localhost:5000/api/cart', {
-              headers: { Authorization: `Bearer ${token}` }
+              headers: { Authorization: `Bearer ${token}` },
             });
+
             if (response.ok) {
               const userCart = await response.json();
-              setCart(userCart.items.map((item) => ({
-                productId: item.productId._id,
-                product: item.productId,
-                quantity: item.quantity
-              })));
+              setCart(
+                userCart.items.map((item) => ({
+                  itemId: uuidv4(),
+                  productId: item.productId._id,
+                  product: item.productId,
+                  quantity: item.quantity,
+                }))
+              );
             }
           }
         } catch (err) {
@@ -62,6 +66,7 @@ export const CartProvider = ({ children }) => {
         }
       }
     };
+
     fetchOrSyncCart();
   }, [user, token, sessionId]);
 
@@ -73,18 +78,23 @@ export const CartProvider = ({ children }) => {
         headers.Authorization = `Bearer ${token}`;
         body = { productId: product._id, quantity };
       }
+
       const response = await fetch('http://localhost:5000/api/cart', {
         method: 'POST',
         headers,
-        body: JSON.stringify(body)
+        body: JSON.stringify(body),
       });
+
       if (!response.ok) throw new Error('Failed to add to cart');
       const updatedCart = await response.json();
-      setCart(updatedCart.items.map((item) => ({
-        productId: item.productId._id,
-        product: item.productId,
-        quantity: item.quantity
-      })));
+      setCart(
+        updatedCart.items.map((item) => ({
+          itemId: uuidv4(),
+          productId: item.productId._id,
+          product: item.productId,
+          quantity: item.quantity,
+        }))
+      );
     } catch (err) {
       alert('Error adding to cart: ' + err.message);
     }
@@ -98,21 +108,26 @@ export const CartProvider = ({ children }) => {
         headers.Authorization = `Bearer ${token}`;
         body = { quantity };
       }
+
       const response = await fetch(`http://localhost:5000/api/cart/${productId}`, {
         method: 'PUT',
         headers,
-        body: JSON.stringify(body)
+        body: JSON.stringify(body),
       });
+
       if (!response.ok) throw new Error('Failed to update quantity');
       const updatedCart = await response.json();
       if (quantity < 1) {
         removeFromCart(productId);
       } else {
-        setCart(updatedCart.items.map((item) => ({
-          productId: item.productId._id,
-          product: item.productId,
-          quantity: item.quantity
-        })));
+        setCart(
+          updatedCart.items.map((item) => ({
+            itemId: uuidv4(),
+            productId: item.productId._id,
+            product: item.productId,
+            quantity: item.quantity,
+          }))
+        );
       }
     } catch (err) {
       alert('Error updating quantity: ' + err.message);
@@ -127,24 +142,44 @@ export const CartProvider = ({ children }) => {
         headers.Authorization = `Bearer ${token}`;
         url = `http://localhost:5000/api/cart/${productId}`;
       }
+
       const response = await fetch(url, {
         method: 'DELETE',
-        headers
+        headers,
       });
+
       if (!response.ok) throw new Error('Failed to remove item');
       const updatedCart = await response.json();
-      setCart(updatedCart.items.map((item) => ({
-        productId: item.productId._id,
-        product: item.productId,
-        quantity: item.quantity
-      })));
+      setCart(
+        updatedCart.items.map((item) => ({
+          itemId: uuidv4(),
+          productId: item.productId._id,
+          product: item.productId,
+          quantity: item.quantity,
+        }))
+      );
     } catch (err) {
       alert('Error removing item: ' + err.message);
     }
   };
 
+  const clearCart = () => {
+    setCart([]);
+    localStorage.removeItem('cart');
+    localStorage.removeItem('sessionId');
+  };
+
   return (
-    <CartContext.Provider value={{ cart, addToCart, updateQuantity, removeFromCart, sessionId }}>
+    <CartContext.Provider
+      value={{
+        cart,
+        addToCart,
+        updateQuantity,
+        removeFromCart,
+        clearCart,
+        sessionId,
+      }}
+    >
       {children}
     </CartContext.Provider>
   );
