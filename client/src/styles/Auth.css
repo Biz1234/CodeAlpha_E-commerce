@@ -1,83 +1,90 @@
 /* auth.css */
-.auth-container {
+
+
+
+.auth-container,
+.login-container {
+  background: white;
+  padding: 2.5rem 2rem;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  width: 100%;
   max-width: 400px;
-  margin: 3rem auto;
-  padding: 2.5rem;
-  background-color: var(--white);
-  border-radius: var(--border-radius);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  text-align: center;
-  font-family: var(--font-main);
 }
 
-.auth-container h2 {
+h2 {
   margin-bottom: 1.5rem;
-  font-size: 2rem;
-  color: var(--text-color);
-  font-weight: 600;
+  color: #333;
+  text-align: center;
 }
 
 form {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1.2rem;
 }
 
-.form-group {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  width: 100%;
-}
-
-.form-group label {
-  margin-bottom: 0.5rem;
+label {
   font-weight: 500;
-  color: var(--text-color);
-  font-size: 0.95rem;
+  color: #444;
+  margin-bottom: 0.3rem;
+  display: block;
 }
 
-.form-group input[type="email"],
-.form-group input[type="password"] {
+input {
   width: 100%;
-  padding: 0.6rem 1rem;
-  border: 1px solid #ced4da;
-  border-radius: var(--border-radius);
+  padding: 0.75rem 1rem;
   font-size: 1rem;
-  transition: all 0.3s ease;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  background-color: #f9f9f9;
+  transition: border-color 0.2s;
 }
 
-.form-group input:focus {
-  border-color: var(--primary-color);
+input:focus {
   outline: none;
-  box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.2);
+  border-color: #4a90e2;
+  background-color: #fff;
 }
 
 button {
-  padding: 0.75rem;
-  background-color: var(--primary-color);
-  color: var(--white);
-  border: none;
-  border-radius: var(--border-radius);
+  padding: 0.8rem 1rem;
   font-size: 1rem;
-  font-weight: 500;
+  background-color: #4a90e2;
+  color: white;
+  border: none;
+  border-radius: 10px;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: background-color 0.2s, transform 0.1s;
 }
 
 button:hover {
-  background-color: #0b5ed7;
+  background-color: #357ab8;
 }
 
 button:disabled {
-  background-color: #adb5bd;
+  background-color: #a5c6f1;
   cursor: not-allowed;
 }
 
 .error {
-  color: var(--danger-color);
+  background-color: #ffe0e0;
+  color: #d8000c;
+  padding: 0.75rem 1rem;
+  border-left: 5px solid #d8000c;
+  border-radius: 8px;
+  margin-bottom: 1rem;
   font-size: 0.95rem;
-  margin-top: -0.5rem;
-  min-height: 1.2em;
-  text-align: center;
+}
+
+@media (max-width: 480px) {
+  .auth-container,
+  .login-container {
+    padding: 2rem 1.2rem;
+    border-radius: 12px;
+  }
+
+  h2 {
+    font-size: 1.5rem;
+  }
 }

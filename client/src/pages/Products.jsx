@@ -76,7 +76,14 @@ const Products = () => {
         ) : (
           products.map((product) => (
             <div key={product._id} className="product-card">
-              <img src={`http://localhost:5000${product.image}`} alt={product.name} />
+              <img
+                src={`http://localhost:5000${product.image}`}
+                alt={product.name}
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = '/fallback.jpg'; // fallback image from public/ folder
+                }}
+              />
               <h3>{product.name}</h3>
               <p>${product.price.toFixed(2)}</p>
               <Link to={`/product/${product._id}`}>View Details</Link>

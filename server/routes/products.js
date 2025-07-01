@@ -30,8 +30,7 @@ const upload = multer({
   limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
 });
 
-// Serve static files from uploads folder
-router.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+// ✅ DO NOT serve uploads here (already handled in server.js)
 
 // POST create product with image
 router.post('/', upload.single('image'), async (req, res) => {
@@ -40,7 +39,9 @@ router.post('/', upload.single('image'), async (req, res) => {
     if (!req.file) {
       return res.status(400).json({ message: 'Image is required' });
     }
-    const image = `/uploads/${req.file.filename}`;
+
+    const image = `/uploads/${req.file.filename}`; // This will work with express.static in server.js
+
     const product = await Product.create({
       name,
       price,
@@ -49,6 +50,7 @@ router.post('/', upload.single('image'), async (req, res) => {
       stock,
       category
     });
+
     res.status(201).json(product);
   } catch (err) {
     console.error('Create product error:', err);

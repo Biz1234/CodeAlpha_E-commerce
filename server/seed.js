@@ -15,7 +15,7 @@ const products = [
     name:' laptop',
     price: 999.9,
     description: 'High-performance laptop with 16GB RAM',
-    image: 'https://example.com/laptop.jpg',
+    image: '/images/laptop.jpeg',
     category: 'Electronics',
     stock: 10
 },
@@ -24,7 +24,7 @@ const products = [
     name: 'Smartphone',
     price: 499.99,
     description: 'Latest smartphone with 5G support',
-    image: 'https://unsplash.com/photos/macbook-pro-on-top-of-brown-table-1SAnrIxw5OY',
+    image: '/images/smartphone.jpeg',
     category: 'Electronics',
     stock: 20
   },
@@ -32,7 +32,7 @@ const products = [
     name: 'Headphones',
     price: 79.99,
     description: 'Wireless headphones with noise cancellation',
-    image: 'https://example.com/headphones.jpg',
+    image: '/images/headphone.jpeg',
     category: 'Accessories',
     stock: 15
   }
