@@ -1,7 +1,6 @@
-import { Routes, Route, Link, useNavigate } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import { useContext } from 'react';
 import { AuthContext } from './context/AuthContext';
-import { CartContext } from './context/CartContext';
 import Products from './pages/Products';
 import ProductDetails from './pages/ProductDetails';
 import Cart from './pages/Cart';
@@ -10,54 +9,92 @@ import Register from './pages/Register';
 import Checkout from './pages/Checkout';
 import Orders from './pages/Orders';
 import Profile from './pages/Profile';
+import AdminDashboard from './pages/Admin/AdminDashboard';
+import ProtectedAdminRoute from './components/ProtectedAdminRoute';
+import UserLayout from './components/UserLayout';
 import './App.css';
 
 function App() {
-  const { user, logout } = useContext(AuthContext);
-  const { cart } = useContext(CartContext);
-  const navigate = useNavigate();
-
-  const handleLogout = () => {
-    logout();
-    navigate('/');
-  };
-
-  const cartItemCount = cart.reduce((total, item) => total + item.quantity, 0);
+  const { user } = useContext(AuthContext);
 
   return (
-    <div>
-      <nav className="navbar">
-        <Link to="/">Home</Link>
-        <Link to="/cart">
-          Cart {cartItemCount > 0 && <span className="cart-badge">{cartItemCount}</span>}
-        </Link>
-        <Link to="/orders">Orders</Link>
-        <Link to="/profile">Profile</Link>
-  
-        {user ? (
-          <>
-            <span>Welcome, {user.name}</span>
-            <button onClick={handleLogout}>Logout</button>
-          </>
-        ) : (
-          <>
-            <Link to="/login">Login</Link>
-            <Link to="/register">Register</Link>
-          </>
-        )}
-      </nav>
-      <h1>E-commerce Store</h1>
-      <Routes>
-        <Route path="/" element={<Products />} />
-        <Route path="/product/:id" element={<ProductDetails />} />
-        <Route path="/cart" element={<Cart />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/checkout" element={<Checkout />} />
-        <Route path="/orders" element={<Orders />} />
-        <Route path="/profile" element={<Profile />} />
-      </Routes>
-    </div>
+    <Routes>
+      {/* Wrap user routes inside UserLayout */}
+      <Route
+        path="/"
+        element={
+          <UserLayout>
+            <Products />
+          </UserLayout>
+        }
+      />
+      <Route
+        path="/product/:id"
+        element={
+          <UserLayout>
+            <ProductDetails />
+          </UserLayout>
+        }
+      />
+      <Route
+        path="/cart"
+        element={
+          <UserLayout>
+            <Cart />
+          </UserLayout>
+        }
+      />
+      <Route
+        path="/login"
+        element={
+          <UserLayout>
+            <Login />
+          </UserLayout>
+        }
+      />
+      <Route
+        path="/register"
+        element={
+          <UserLayout>
+            <Register />
+          </UserLayout>
+        }
+      />
+      <Route
+        path="/checkout"
+        element={
+          <UserLayout>
+            <Checkout />
+          </UserLayout>
+        }
+      />
+      <Route
+        path="/orders"
+        element={
+          <UserLayout>
+            <Orders />
+          </UserLayout>
+        }
+      />
+      <Route
+        path="/profile"
+        element={
+          <UserLayout>
+            <Profile />
+          </UserLayout>
+        }
+      />
+
+      {/* Admin Dashboard - no layout */}
+      <Route
+        path="/admin"
+        element={
+          <ProtectedAdminRoute>
+            <AdminDashboard />
+          </ProtectedAdminRoute>
+        }
+      />
+    </Routes>
   );
 }
 

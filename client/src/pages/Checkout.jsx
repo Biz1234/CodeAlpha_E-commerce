@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { CartContext } from '../context/CartContext';
@@ -11,15 +11,24 @@ const Checkout = () => {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
+  // Redirect if not logged in
+  useEffect(() => {
+    if (!user) {
+      navigate('/login');
+    }
+  }, [user, navigate]);
+
   if (!user) {
-    navigate('/login');
     return null;
   }
 
-  // ✅ Calculate total amount safely
-  const totalPrice = cart.reduce((total, item) => {
-    const price = item.product?.price || 0;
-    const quantity = item.quantity || 0;
+  // Filter out invalid cart items
+  const validCartItems = cart.filter((item) => item.productId && item.price && item.quantity > 0);
+
+  // Calculate total price
+  const totalPrice = validCartItems.reduce((total, item) => {
+    const price = Number(item.price) || 0;
+    const quantity = Number(item.quantity) || 0;
     return total + price * quantity;
   }, 0);
 
@@ -28,26 +37,17 @@ const Checkout = () => {
     setError(null);
 
     try {
-      // ✅ Ensure cart has items
-      if (!cart || cart.length === 0) {
-        throw new Error('Your cart is empty');
+      if (validCartItems.length === 0) {
+        throw new Error('Your cart is empty or contains invalid items.');
       }
 
-      // ✅ Build products array
-      const products = cart.map((item) => ({
-        productId: item.product?._id,
-        quantity: item.quantity,
-        price: item.product?.price,
+      // Build items array for order
+      const items = validCartItems.map((item) => ({
+        productId: item.productId,
+        quantity: Number(item.quantity),
+        price: Number(item.price),
       }));
 
-      // ✅ Make sure no undefined values are sent
-      for (const product of products) {
-        if (!product.productId || product.quantity <= 0 || isNaN(product.price)) {
-          throw new Error('Invalid product data in cart');
-        }
-      }
-
-      // ✅ Send request
       const response = await fetch('http://localhost:5000/api/order', {
         method: 'POST',
         headers: {
@@ -55,8 +55,8 @@ const Checkout = () => {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          products,
-          totalAmount: totalPrice, // ✅ Now correctly defined
+          items, // Changed from 'products' to 'items' to match order.js
+          totalAmount: totalPrice,
         }),
       });
 
@@ -69,16 +69,18 @@ const Checkout = () => {
       clearCart();
       navigate('/orders');
     } catch (err) {
+      console.error('Checkout error:', err);
       setError(err.message);
     } finally {
       setLoading(false);
     }
   };
 
-  if (!cart || cart.length === 0) {
+  if (validCartItems.length === 0) {
     return (
       <div className="checkout-container">
-        <h2>Your cart is empty</h2>
+        <h2>Your cart is empty or contains invalid items</h2>
+        <p>Please add some products to proceed.</p>
       </div>
     );
   }
@@ -89,26 +91,27 @@ const Checkout = () => {
       {error && <p className="error">Error: {error}</p>}
 
       <div className="checkout-items">
-        {cart.map((item, index) => (
-          <div key={`${item.product._id}-${index}`} className="checkout-item">
+        {validCartItems.map((item, index) => (
+          <div key={`${item.productId}-${index}`} className="checkout-item">
             <img
-              src={`http://localhost:5000${item.product.image}`}
-              alt={item.product.name}
+              src={`http://localhost:5000${item.product?.image || '/fallback.jpg'}`}
+              alt={item.product?.name || 'Product'}
+              onError={(e) => {
+                e.target.onerror = null;
+                e.target.src = '/fallback.jpg';
+              }}
             />
             <div>
-              <h3>{item.product.name}</h3>
-              <p>Price: ${item.product.price?.toFixed(2) || '0.00'}</p>
-              <p>Quantity: {item.quantity}</p>
-              <p>
-                Subtotal: $
-                {(item.product.price * item.quantity).toFixed(2)}
-              </p>
+              <h3>{item.product?.name || 'Unknown Product'}</h3>
+              <p>Price: ETB {Number(item.price).toFixed(2)}</p>
+              <p>Quantity: {Number(item.quantity)}</p>
+              <p>Subtotal: ETB {(Number(item.price) * Number(item.quantity)).toFixed(2)}</p>
             </div>
           </div>
         ))}
       </div>
 
-      <h3>Total: ${totalPrice.toFixed(2)}</h3>
+      <h3>Total: ETB {totalPrice.toFixed(2)}</h3>
       <button
         onClick={handleCheckout}
         disabled={loading}

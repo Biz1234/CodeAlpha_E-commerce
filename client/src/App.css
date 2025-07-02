@@ -1,94 +1,77 @@
-/* app.css - Global Styles */
-:root {
-  --primary-color: #0d6efd;
-  --secondary-color: #6c757d;
-  --accent-color: #ffc107;
-  --bg-color: #f8f9fa;
-  --text-color: #212529;
-  --white: #ffffff;
-  --danger-color: #dc3545;
-  --font-main: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  --border-radius: 8px;
-  --transition-speed: 0.3s;
+/* App.css */
+
+.app-container {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f8f9fa;
+  min-height: 100vh;
 }
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  background-color: #343a40;
+  padding: 1rem 2rem;
+  align-items: center;
+  color: #fff;
 }
 
-html {
-  font-size: 16px;
-}
-
-body {
-  font-family: var(--font-main);
-  background-color: var(--bg-color);
-  color: var(--text-color);
-  line-height: 1.6;
-  padding: 1rem;
-}
-
-h1, h2, h3, h4, h5, h6 {
-  margin-bottom: 1rem;
-  font-weight: 600;
-}
-
-a {
+.nav-link {
+  color: #ddd;
   text-decoration: none;
-  color: var(--primary-color);
+  margin: 0 1rem;
+  display: inline-flex;
+  align-items: center;
+  transition: color 0.3s ease;
 }
 
-button {
+.nav-link:hover {
+  color: #ffffff;
+}
+
+.nav-left,
+.nav-right {
+  display: flex;
+  align-items: center;
+}
+
+.cart-badge {
+  background-color: #dc3545;
+  color: #fff;
+  border-radius: 50%;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  margin-left: 0.3rem;
+}
+
+.logout-btn {
+  background-color: transparent;
+  border: 1px solid #fff;
+  color: #fff;
+  margin-left: 1rem;
+  padding: 0.3rem 0.7rem;
+  border-radius: 4px;
   cursor: pointer;
-  font-family: inherit;
-  border: none;
-  background: none;
-  padding: 0;
+  transition: background-color 0.3s ease;
 }
 
-button:focus,
-input:focus,
-select:focus,
-textarea:focus {
-  outline: none;
+.logout-btn:hover {
+  background-color: #495057;
 }
 
-img {
-  max-width: 100%;
-  display: block;
+.welcome-text {
+  color: #ccc;
+  margin-right: 1rem;
 }
 
-.container {
+.main-content {
+  padding: 2rem;
   max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 1rem;
+  margin: auto;
 }
 
-/* Utility Classes */
-.text-center {
+.page-title {
+  font-size: 2rem;
   text-align: center;
-}
-
-.btn {
-  display: inline-block;
-  background-color: var(--primary-color);
-  color: var(--white);
-  padding: 0.5rem 1rem;
-  border-radius: var(--border-radius);
-  transition: background-color var(--transition-speed);
-  font-weight: 500;
-}
-
-.btn:hover {
-  background-color: #0b5ed7;
-}
-
-.btn-danger {
-  background-color: var(--danger-color);
-}
-
-.btn-danger:hover {
-  background-color: #bb2d3b;
+  margin-bottom: 2rem;
+  color: #333;
 }

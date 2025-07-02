@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const Product = require('../models/Product');
+const Product = require('../models/Product'); // Fixed typo: 'models svalids' → 'models'
+const { authMiddleware, adminMiddleware } = require('../middleware/authMiddleware');
 const multer = require('multer');
 const path = require('path');
 
@@ -30,10 +31,8 @@ const upload = multer({
   limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
 });
 
-// ✅ DO NOT serve uploads here (already handled in server.js)
-
 // POST create product with image
-router.post('/', upload.single('image'), async (req, res) => {
+router.post('/', authMiddleware, adminMiddleware, upload.single('image'), async (req, res) => {
   try {
     const { name, price, description, stock, category } = req.body;
     if (!req.file) {
@@ -104,6 +103,39 @@ router.get('/:id', async (req, res) => {
     res.json(product);
   } catch (err) {
     console.error('Get product error:', err);
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+});
+
+// PUT update product by ID
+router.put('/:id', authMiddleware, adminMiddleware, upload.single('image'), async (req, res) => {
+  try {
+    const { name, price, description, stock, category } = req.body;
+    const updateData = { name, price, description, stock, category };
+    if (req.file) {
+      updateData.image = `/uploads/${req.file.filename}`;
+    }
+    const product = await Product.findByIdAndUpdate(req.params.id, updateData, { new: true });
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
+    res.json(product);
+  } catch (err) {
+    console.error('Update product error:', err);
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+});
+
+// DELETE product by ID
+router.delete('/:id', authMiddleware, adminMiddleware, async (req, res) => {
+  try {
+    const product = await Product.findByIdAndDelete(req.params.id);
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
+    res.json({ message: 'Product deleted' });
+  } catch (err) {
+    console.error('Delete product error:', err);
     res.status(500).json({ message: 'Server error', error: err.message });
   }
 });

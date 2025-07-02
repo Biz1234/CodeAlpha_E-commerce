@@ -1,114 +1,21 @@
-/* index.css - App Component Specific Styles */
+/* index.css */
 
-.navbar {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem 0;
-  background-color: var(--white);
-  border-bottom: 1px solid #dee2e6;
-  position: sticky;
-  top: 0;
-  z-index: 1000;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  transition: background-color 0.3s ease;
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-.navbar a,
-.navbar span,
-.navbar button {
-  font-size: 1rem;
-  font-weight: 500;
-  transition: color 0.3s ease, background-color 0.3s ease;
+body {
+  background-color: #f1f1f1;
+  font-family: 'Segoe UI', sans-serif;
+  color: #333;
 }
 
-/* === Navigation Links === */
-.navbar a {
-  color: var(--text-color);
-  margin: 0 0.5rem;
-  position: relative;
+a {
+  text-decoration: none;
 }
 
-.navbar a:hover,
-.navbar a.active {
-  color: var(--primary-color);
-}
-
-/* Optional: Underline animation on hover */
-.navbar a::after {
-  content: '';
-  position: absolute;
-  width: 0%;
-  height: 2px;
-  background: var(--primary-color);
-  left: 0;
-  bottom: -4px;
-  transition: width 0.3s ease;
-}
-
-.navbar a:hover::after,
-.navbar a.active::after {
-  width: 100%;
-}
-
-/* === Cart Badge === */
-.cart-badge {
-  background-color: var(--primary-color);
-  color: var(--white);
-  border-radius: 50%;
-  width: 1.2rem;
-  height: 1.2rem;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.75rem;
-  margin-left: 0.3rem;
-  vertical-align: middle;
-  font-weight: bold;
-}
-
-/* === User Info / Auth Buttons === */
-.navbar .auth-buttons {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.navbar .auth-buttons span {
-  font-weight: 500;
-  color: var(--secondary-color);
-}
-
-.navbar .auth-buttons button {
-  background-color: var(--secondary-color);
-  color: var(--white);
-  padding: 0.4rem 0.8rem;
-  border-radius: var(--border-radius);
-  font-weight: 500;
-  transition: background-color 0.3s ease;
-}
-
-.navbar .auth-buttons button:hover {
-  background-color: #5a6268;
-}
-
-/* === Responsive Adjustments === */
-@media (max-width: 768px) {
-  .navbar {
-    flex-direction: column;
-    align-items: stretch;
-    padding: 0.75rem 1rem;
-  }
-
-  .navbar a {
-    margin: 0.5rem 0;
-    text-align: left;
-  }
-
-  .navbar .auth-buttons {
-    flex-direction: column;
-    align-items: flex-start;
-    margin-top: 0.5rem;
-  }
+button {
+  font-family: inherit;
 }

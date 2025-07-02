@@ -3,7 +3,7 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 require('dotenv').config();
 const path = require('path');
-
+const bannerRoutes = require('./routes/banner');
 
 const app = express();
 
@@ -24,7 +24,7 @@ app.use('/api/products', require('./routes/products'));
 app.use('/api/cart',require('./routes/cart'));
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/order', require('./routes/order'));
-
+app.use('/api/banners', bannerRoutes);
 
 
 

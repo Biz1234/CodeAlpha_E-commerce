@@ -58,12 +58,15 @@ const Cart = () => {
                   Subtotal: $
                   {((item.product?.price || 0) * item.quantity).toFixed(2)}
                 </p>
-                <button
-                  onClick={() => removeFromCart(item.productId)}
-                  className="remove-btn"
-                >
-                  Remove
-                </button>
+               <button
+  onClick={() => {
+    console.log('Removing product ID:', item.productId);
+    removeFromCart(item.productId);
+  }}
+  className="remove-btn"
+>
+  Remove
+</button>
               </div>
             </div>
           );

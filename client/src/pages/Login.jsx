@@ -3,12 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import '../styles/auth.css';
 
-
 const Login = () => {
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [isAdminLogin, setIsAdminLogin] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -17,8 +17,9 @@ const Login = () => {
     setLoading(true);
     setError('');
     try {
-      await login(email, password);
-      navigate('/'); // Redirect to home for regular users
+      const endpoint = isAdminLogin ? '/api/auth/admin-login' : '/api/auth/login';
+      const user = await login(email, password, endpoint);
+      navigate(user.role === 'admin' ? '/admin' : '/');
     } catch (err) {
       setError(err.message || 'Login failed');
     } finally {
@@ -48,6 +49,16 @@ const Login = () => {
             onChange={(e) => setPassword(e.target.value)}
             required
           />
+        </div>
+        <div>
+          <label>
+            <input
+              type="checkbox"
+              checked={isAdminLogin}
+              onChange={(e) => setIsAdminLogin(e.target.checked)}
+            />
+            Admin Login
+          </label>
         </div>
         <button type="submit" disabled={loading}>
           {loading ? 'Logging in...' : 'Login'}

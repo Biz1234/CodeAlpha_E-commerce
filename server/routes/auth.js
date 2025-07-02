@@ -14,10 +14,25 @@ router.post('/register', async (req, res) => {
     }
     user = new User({ name, email, password });
     await user.save();
-    const token = jwt.sign({ userId: user._id, role: user.role || 'user' }, process.env.JWT_SECRET, {
-      expiresIn: '1h'
+    const token = jwt.sign(
+      {
+        userId: user._id,
+        email: user.email,
+        name: user.name,
+        role: user.role || 'user'
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: '1h' }
+    );
+    res.status(201).json({
+      token,
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role || 'user'
+      }
     });
-    res.status(201).json({ token, user: { _id: user._id, name: user.name, email: user.email, role: user.role || 'user' } });
   } catch (err) {
     console.error('Register error:', err);
     res.status(500).json({ message: 'Server error', error: err.message });
@@ -36,10 +51,25 @@ router.post('/login', async (req, res) => {
     if (!isMatch) {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
-    const token = jwt.sign({ userId: user._id, role: user.role || 'user' }, process.env.JWT_SECRET, {
-      expiresIn: '1h'
+    const token = jwt.sign(
+      {
+        userId: user._id,
+        email: user.email,
+        name: user.name,
+        role: user.role || 'user'
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: '1h' }
+    );
+    res.json({
+      token,
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role || 'user'
+      }
     });
-    res.json({ token, user: { _id: user._id, name: user.name, email: user.email, role: user.role || 'user' } });
   } catch (err) {
     console.error('Login error:', err);
     res.status(500).json({ message: 'Server error', error: err.message });
@@ -61,13 +91,29 @@ router.post('/admin-login', async (req, res) => {
     if (!isMatch) {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
-    const token = jwt.sign({ userId: user._id, role: user.role }, process.env.JWT_SECRET, {
-      expiresIn: '1h'
+    const token = jwt.sign(
+      {
+        userId: user._id,
+        email: user.email,
+        name: user.name,
+        role: user.role
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: '1h' }
+    );
+    res.json({
+      token,
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role
+      }
     });
-    res.json({ token, user: { _id: user._id, name: user.name, email: user.email, role: user.role } });
   } catch (err) {
     console.error('Admin login error:', err);
     res.status(500).json({ message: 'Server error', error: err.message });
   }
 });
+
 module.exports = router;

@@ -28,6 +28,53 @@ const products = [
     category: 'Electronics',
     stock: 20
   },
+
+{
+    name: 'Mouse',
+    price: 100.00,
+    description: 'slight and looking good mouse with cable ',
+    image: '/images/mouse.jpeg',
+    category: 'Electronics',
+    stock: 10
+  },
+
+{
+    name: ' Smart Tv',
+    price: 300.55,
+    description: 'Latest smart-tv with iinternet support',
+    image: '/images/tv.jpeg',
+    category: 'Electronics',
+    stock: 20
+  },
+
+{
+    name: 'Remote',
+    price: 499.99,
+    description: 'smart and slight  remote ',
+    image: '/images/remote.jpeg',
+    category: 'Electronics',
+    stock: 20
+  },
+
+{
+    name: 'Camera',
+    price: 120.22,
+    description: 'Latest camera with modern light support',
+    image: '/images/camera.jpeg',
+    category: 'Electronics',
+    stock: 20
+  },
+
+  {
+    name: 'Computer',
+    price: 400.44,
+    description: 'Latest computer with 5G support',
+    image: '/images/computer.jpeg',
+    category: 'Electronics',
+    stock: 30
+  },
+
+  
   {
     name: 'Headphones',
     price: 79.99,

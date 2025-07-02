@@ -16,11 +16,24 @@ export const AuthProvider = ({ children }) => {
       try {
         const decoded = jwtDecode(token);
 
-        // Validate required fields
+        // Validate token has required fields
         if (!decoded || !decoded.userId) {
           throw new Error('Invalid token payload');
         }
 
+        // Check if we already have a stored user that matches this token
+        const storedUser = localStorage.getItem('user');
+
+        if (storedUser) {
+          const parsedStoredUser = JSON.parse(storedUser);
+          if (parsedStoredUser._id === decoded.userId) {
+            // Use the stored user instead of rebuilding from token
+            setUser(parsedStoredUser);
+            return;
+          }
+        }
+
+        // If no valid stored user, build new userData from token
         const userData = {
           _id: decoded.userId,
           role: decoded.role || 'user',
@@ -30,21 +43,23 @@ export const AuthProvider = ({ children }) => {
           exp: decoded.exp,
         };
 
-        // Only update if user data has changed
-        const storedUser = localStorage.getItem('user');
-        if (storedUser !== JSON.stringify(userData)) {
-          localStorage.setItem('user', JSON.stringify(userData));
+        // Only update localStorage if data changed
+        const serializedUserData = JSON.stringify(userData);
+        if (localStorage.getItem('user') !== serializedUserData) {
+          localStorage.setItem('user', serializedUserData);
         }
 
         setUser(userData);
       } catch (err) {
         console.error('AuthContext - JWT Decode Error:', err);
+        // Clear invalid auth state
         setUser(null);
         setToken(null);
         localStorage.removeItem('token');
         localStorage.removeItem('user');
       }
     } else {
+      // No token means not logged in
       setUser(null);
       localStorage.removeItem('user');
     }
