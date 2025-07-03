@@ -7,7 +7,7 @@ export const CartContext = createContext();
 export const CartProvider = ({ children }) => {
   const { user, token } = useContext(AuthContext);
 
-  // Define normalizeCartItems before useState
+  
   const normalizeCartItems = (items) => {
     if (!Array.isArray(items)) {
       console.warn('Cart items is not an array:', items);
@@ -20,7 +20,7 @@ export const CartProvider = ({ children }) => {
         let price = null;
         let quantity = Number(item.quantity) || 1;
 
-        // Extract productId and price
+        
         if (typeof item.productId === 'object' && item.productId !== null) {
           productId = item.productId._id || item.productId.id || null;
           price = Number(item.productId.price) || Number(item.price) || null;

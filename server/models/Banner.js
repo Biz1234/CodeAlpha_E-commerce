@@ -20,7 +20,7 @@ const bannerSchema = new mongoose.Schema({
   }
 }, { timestamps: true });
 
-// Optional: Add query helper to get active banners
+
 bannerSchema.statics.getActiveBanner = async function () {
   const now = new Date();
   return await this.findOne({ isActive: true, expiresAt: { $gte: now } });

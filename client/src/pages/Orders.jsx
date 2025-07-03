@@ -33,7 +33,7 @@ const Orders = () => {
 
         const data = await response.json();
 
-        // Check for duplicate product IDs
+       
         data.forEach(order => {
           const itemIds = order.items.map(i => i.productId?._id || i.productId);
           const hasDuplicates = new Set(itemIds).size !== itemIds.length;
@@ -43,6 +43,14 @@ const Orders = () => {
         });
 
         setOrders(data);
+        toast.success('Ordered successfully!', { 
+          position: 'top-right',
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
       } catch (err) {
         setError(err.message);
         console.error('Error fetching orders:', err);
@@ -79,7 +87,7 @@ const Orders = () => {
     <div className="orders-container">
       <h2>Your Orders</h2>
       {orders.map((order) => {
-        // Group items by productId to prevent duplicates
+        // Group items 
         const groupedItems = {};
 
         order.items.forEach((item) => {

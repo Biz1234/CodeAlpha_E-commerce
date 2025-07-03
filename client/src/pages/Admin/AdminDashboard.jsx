@@ -5,8 +5,10 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { jwtDecode } from 'jwt-decode';
 import '../../styles/AdminDashboard.css';
+import { useNavigate } from 'react-router-dom';
 
 const AdminDashboard = () => {
+  const navigate = useNavigate();
   const { user, token, logout } = useContext(AuthContext);
   const [activeTab, setActiveTab] = useState('orders');
   const [orders, setOrders] = useState([]);
@@ -29,11 +31,13 @@ const AdminDashboard = () => {
         if (decoded.exp * 1000 < Date.now()) {
           toast.error('Session expired. Please log in again.');
           logout();
+          navigate('/login');
           return;
         }
       } catch (err) {
         toast.error('Invalid token. Please log in again.');
         logout();
+        navigate('/login');
         return;
       }
     }
@@ -67,7 +71,14 @@ const AdminDashboard = () => {
     };
 
     if (token) fetchData();
-  }, [activeTab, token, logout]);
+  }, [activeTab, token, logout,navigate]);
+
+const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
+
+
 
   const updateOrderStatus = async (orderId, newStatus) => {
     try {
@@ -184,7 +195,12 @@ const AdminDashboard = () => {
 
   return (
     <div className="admin-dashboard">
-      <h2>Welcome, {user.name} (Admin)</h2>
+        <div className="admin-topbar">
+        <h2>Welcome, {user.name} (Admin)</h2>
+        <button className="admin-logout-btn" onClick={handleLogout}>
+          Logout
+        </button>
+      </div>
       <div className="tabs">
         <button onClick={() => setActiveTab('orders')} className={activeTab === 'orders' ? 'active' : ''}>
           Orders
@@ -257,13 +273,19 @@ const AdminDashboard = () => {
               required
             />
             <input
-              type="number"
-              value={productForm.price}
-              onChange={(e) => setProductForm({ ...productForm, price: e.target.value })}
-              placeholder="Price"
-              required
-              min="0"
-            />
+  type="text"
+  value={productForm.price}
+  onChange={(e) => {
+    const value = e.target.value;
+   
+    if (/^\d*\.?\d{0,2}$/.test(value)) {
+      setProductForm({ ...productForm, price: value });
+    }
+  }}
+  placeholder="Price (e.g., 99.99)"
+  required
+/>
+
             <textarea
               value={productForm.description}
               onChange={(e) => setProductForm({ ...productForm, description: e.target.value })}

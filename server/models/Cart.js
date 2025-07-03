@@ -6,8 +6,8 @@ const cartItemSchema = new mongoose.Schema({
 });
 
 const cartSchema = new mongoose.Schema({
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // Optional for guest users
-  sessionId: { type: String }, // For guest users
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, 
+  sessionId: { type: String }, 
   items: [cartItemSchema],
   updatedAt: { type: Date, default: Date.now }
 });

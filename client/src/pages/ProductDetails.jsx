@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { CartContext } from '../context/CartContext';
+import { ToastContainer, toast } from 'react-toastify'; // Import Toastify
+import 'react-toastify/dist/ReactToastify.css'; // Import Toastify CSS
 import '../styles/ProductDetails.css';
 
 const ProductDetails = () => {
@@ -31,8 +33,15 @@ const ProductDetails = () => {
   const handleAddToCart = () => {
     if (product && quantity > 0) {
       addToCart(product, quantity);
-      alert('Added to cart!');
-      navigate('/cart');
+      const toastId = toast.success('Added successfully!', {
+        position: 'top-right',
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        onClose: () => navigate('/cart'), // Navigate after toast closes
+      }); // Toastify success notification
     }
   };
 
@@ -60,6 +69,7 @@ const ProductDetails = () => {
           Add to Cart
         </button>
       </div>
+      <ToastContainer /> 
     </div>
   );
 };

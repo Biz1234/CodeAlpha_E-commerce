@@ -11,7 +11,7 @@ const Checkout = () => {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  // Redirect if not logged in
+  
   useEffect(() => {
     if (!user) {
       navigate('/login');
@@ -22,10 +22,10 @@ const Checkout = () => {
     return null;
   }
 
-  // Filter out invalid cart items
+  
   const validCartItems = cart.filter((item) => item.productId && item.price && item.quantity > 0);
 
-  // Calculate total price
+  
   const totalPrice = validCartItems.reduce((total, item) => {
     const price = Number(item.price) || 0;
     const quantity = Number(item.quantity) || 0;
@@ -41,7 +41,7 @@ const Checkout = () => {
         throw new Error('Your cart is empty or contains invalid items.');
       }
 
-      // Build items array for order
+      
       const items = validCartItems.map((item) => ({
         productId: item.productId,
         quantity: Number(item.quantity),
@@ -55,7 +55,7 @@ const Checkout = () => {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          items, // Changed from 'products' to 'items' to match order.js
+          items, 
           totalAmount: totalPrice,
         }),
       });

@@ -1,5 +1,5 @@
 import React, { useState, useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import '../styles/auth.css';
 
@@ -31,39 +31,36 @@ const Login = () => {
     <div className="login-container">
       <h2>Login</h2>
       {error && <p className="error">{error}</p>}
-      <form onSubmit={handleSubmit}>
-        <div>
+      <form onSubmit={handleSubmit} className="auth-form">
+        <div className="form-group">
           <label>Email:</label>
           <input
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
+            className="input-with-icon email"
           />
         </div>
-        <div>
+        <div className="form-group">
           <label>Password:</label>
           <input
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
+            className="input-with-icon password"
           />
         </div>
-        <div>
-          <label>
-            <input
-              type="checkbox"
-              checked={isAdminLogin}
-              onChange={(e) => setIsAdminLogin(e.target.checked)}
-            />
-            Admin Login
-          </label>
-        </div>
+        
         <button type="submit" disabled={loading}>
           {loading ? 'Logging in...' : 'Login'}
         </button>
       </form>
+      <p style={{ textAlign: 'center', marginTop: '1rem' }}>
+        Don't have an account?{' '}
+        <Link to="/register" className="auth-link">Register</Link>
+      </p>
     </div>
   );
 };

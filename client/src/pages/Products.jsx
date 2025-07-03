@@ -1,5 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect, useContext } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { FaCartPlus } from 'react-icons/fa'; // Import cart icon from react-icons
+import { CartContext } from '../context/CartContext';
+import { ToastContainer, toast } from 'react-toastify'; // Import Toastify
+import 'react-toastify/dist/ReactToastify.css'; // Import Toastify CSS
 import '../styles/Products.css';
 
 const Products = () => {
@@ -10,6 +14,8 @@ const Products = () => {
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('');
   const [banner, setBanner] = useState(null);
+  const { addToCart } = useContext(CartContext); // Access addToCart from CartContext
+  const navigate = useNavigate();
 
   // Fetch categories
   useEffect(() => {
@@ -59,9 +65,28 @@ const Products = () => {
     fetchBanner();
   }, []);
 
+  const handleAddToCart = (product) => {
+    if (!product._id || !product.price) {
+      toast.error('Invalid product data!', {
+        position: 'top-right',
+        autoClose: 3000,
+      });
+      return;
+    }
+    addToCart(product, 1); // Use existing addToCart from CartContext with quantity 1
+    toast.success('Added successfully!', {
+      position: 'top-right',
+      autoClose: 3000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+    });
+    // Removed navigate('/cart') to avoid redirection
+  };
+
   return (
     <div className="products-page">
-
       {/* 🔥 Flash Sale Banner (Dynamic) */}
       {banner && (
         <div className="flash-sale-banner">
@@ -122,37 +147,42 @@ const Products = () => {
         ) : (
           products.map((product) => (
             <article key={product._id} className="product-card">
-              <img
-                src={`http://localhost:5000${product.image}`}
-                alt={product.name}
-                onError={(e) => {
-                  e.target.onerror = null;
-                  e.target.src = '/fallback.jpg';
-                }}
-                className="product-image"
-              />
-
+              <div className="product-image-wrapper">
+                <img
+                  src={`http://localhost:5000${product.image}`}
+                  alt={product.name}
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = '/fallback.jpg';
+                  }}
+                  className="product-image"
+                />
+                {/* Product Badges */}
+                {product.isNew && <span className="product-badge new">New</span>}
+                {product.discount && <span className="product-badge sale">Sale</span>}
+              </div>
               <div className="product-info">
                 <h3 title={product.name}>
                   {product.name.length > 40 ? product.name.slice(0, 40) + '...' : product.name}
                 </h3>
-
                 <p className="product-price">ETB {product.price}</p>
-                
                 <p className="product-desc">
                   {product.description?.slice(0, 60)}...
                 </p>
-
                 <div className="product-actions">
                   <Link to={`/product/${product._id}`} className="view-details-btn">
                     View Details
                   </Link>
+                  <button className="add-to-cart-btn" onClick={() => handleAddToCart(product)}>
+                    <FaCartPlus /> 
+                  </button>
                 </div>
               </div>
             </article>
           ))
         )}
       </section>
+      <ToastContainer /> {/* Add ToastContainer for notifications */}
     </div>
   );
 };

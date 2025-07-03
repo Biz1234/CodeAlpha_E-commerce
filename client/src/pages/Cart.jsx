@@ -1,12 +1,15 @@
 import React, { useContext } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { CartContext } from '../context/CartContext';
+import { ToastContainer, toast } from 'react-toastify'; 
+import 'react-toastify/dist/ReactToastify.css'; 
 import '../styles/Cart.css';
 
 const Cart = () => {
   const { user } = useContext(AuthContext);
   const { cart, updateQuantity, removeFromCart } = useContext(CartContext);
+  const navigate = useNavigate();
 
   const totalPrice = cart.reduce(
     (total, item) => total + (item.product?.price || 0) * item.quantity,
@@ -26,7 +29,7 @@ const Cart = () => {
       <h2>{user ? `${user.name}'s Cart` : 'Your Cart'}</h2>
       <div className="cart-items">
         {cart.map((item, index) => {
-          // Use productId + index to ensure uniqueness
+          
           const uniqueKey = item.productId ? `${item.productId}-${index}` : `cart-item-${index}`;
 
           return (
@@ -61,7 +64,24 @@ const Cart = () => {
                <button
   onClick={() => {
     console.log('Removing product ID:', item.productId);
-    removeFromCart(item.productId);
+    removeFromCart(item.productId)
+      .then(() => {
+        toast.success('Removed successfully!', {
+          position: 'top-right',
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
+      })
+      .catch((err) => {
+        console.error('Error removing item:', err);
+        toast.error('Error removing item!', {
+          position: 'top-right',
+          autoClose: 3000,
+        });
+      });
   }}
   className="remove-btn"
 >
@@ -73,9 +93,21 @@ const Cart = () => {
         })}
       </div>
       <h3>Total: ${totalPrice.toFixed(2)}</h3>
-      <Link to="/checkout" className="checkout-btn">
+      <Link
+        to="/checkout"
+        className="checkout-btn"
+        onClick={(e) => {
+          e.preventDefault(); 
+          toast.info('Redirecting to checkout...', {
+            position: 'top-right',
+            autoClose: 2000, 
+            onClose: () => navigate('/checkout'), 
+          });
+        }}
+      >
         Proceed to Checkout
       </Link>
+      <ToastContainer /> 
     </div>
   );
 };

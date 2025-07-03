@@ -1,9 +1,7 @@
-
-
-import  { useState, useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useContext } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
-import '../styles/Auth.css';
+import '../styles/auth.css';
 
 const Register = () => {
   const { register } = useContext(AuthContext);
@@ -29,8 +27,8 @@ const Register = () => {
     <div className="auth-container">
       <h2>Register</h2>
       {error && <p className="error">{error}</p>}
-      <form onSubmit={handleSubmit}>
-        <div>
+      <form onSubmit={handleSubmit} className="auth-form">
+        <div className="form-group">
           <label>Name:</label>
           <input
             type="text"
@@ -38,9 +36,10 @@ const Register = () => {
             value={formData.name}
             onChange={handleChange}
             required
+            className="input-with-icon name"
           />
         </div>
-        <div>
+        <div className="form-group">
           <label>Email:</label>
           <input
             type="email"
@@ -48,9 +47,10 @@ const Register = () => {
             value={formData.email}
             onChange={handleChange}
             required
+            className="input-with-icon email"
           />
         </div>
-        <div>
+        <div className="form-group">
           <label>Password:</label>
           <input
             type="password"
@@ -58,10 +58,15 @@ const Register = () => {
             value={formData.password}
             onChange={handleChange}
             required
+            className="input-with-icon password"
           />
         </div>
         <button type="submit">Register</button>
       </form>
+      <p style={{ textAlign: 'center', marginTop: '1rem' }}>
+        Already have an account?{' '}
+        <Link to="/login" className="auth-link">Login</Link>
+      </p>
     </div>
   );
 };

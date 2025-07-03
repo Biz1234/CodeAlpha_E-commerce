@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-// Define a schema for items in an order
+// Define a schema 
 const orderItemSchema = new mongoose.Schema({
   productId: {
     type: mongoose.Schema.Types.ObjectId,
@@ -18,7 +18,7 @@ const orderItemSchema = new mongoose.Schema({
   }
 });
 
-// Main order schema
+
 const orderSchema = new mongoose.Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
