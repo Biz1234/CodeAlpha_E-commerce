@@ -1,9 +1,11 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AuthContext } from '../context/AuthContext';
+import { AuthContext } from '../context/AuthProvider';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import '../styles/Orders.css';
+import { fetchOrders } from '../api';
+import config from '../config';
 
 const Orders = () => {
   const { user, token } = useContext(AuthContext);
@@ -18,62 +20,52 @@ const Orders = () => {
       return;
     }
 
-    const fetchOrders = async () => {
+    const fetchOrdersData = async () => {
       try {
-        const response = await fetch(`http://localhost:5000/api/order/user/${user._id}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.message || 'Failed to fetch orders');
-        }
-
-        const data = await response.json();
-
-       
-        data.forEach(order => {
-          const itemIds = order.items.map(i => i.productId?._id || i.productId);
-          const hasDuplicates = new Set(itemIds).size !== itemIds.length;
-          if (hasDuplicates) {
-            console.warn('Order has duplicate product IDs:', order._id);
-          }
-        });
+        const { data } = await fetchOrders(user._id, token);
 
         setOrders(data);
-        toast.success('Ordered successfully!', { 
+        toast.success('Orders fetched successfully!', {
           position: 'top-right',
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
+          autoClose: 1500,
         });
       } catch (err) {
-        setError(err.message);
-        console.error('Error fetching orders:', err);
-        toast.error(err.message);
+        const message = err.response?.data?.message || 'Failed to fetch orders. Please try again later.';
+        setError(message);
+        toast.error(message, {
+          position: 'top-right',
+          autoClose: 3000,
+        });
       } finally {
         setLoading(false);
       }
     };
 
-    fetchOrders();
+    fetchOrdersData();
   }, [user, token, navigate]);
 
-  if (loading) return <div>Loading...</div>;
-
-  if (error) {
+  // Loading state
+  if (loading) {
     return (
-      <div className="orders-container">
-        <p className="error">Error: {error}</p>
+      <div className="orders-container loading">
+        <div className="spinner"></div>
+        <p>Loading your orders...</p>
         <ToastContainer />
       </div>
     );
   }
 
+  // Error state
+  if (error) {
+    return (
+      <div className="orders-container">
+        <h2 className="error">⚠ {error}</h2>
+        <ToastContainer />
+      </div>
+    );
+  }
+
+  // No orders state
   if (orders.length === 0) {
     return (
       <div className="orders-container">
@@ -87,25 +79,24 @@ const Orders = () => {
     <div className="orders-container">
       <h2>Your Orders</h2>
       {orders.map((order) => {
-        // Group items 
+        // Group items by productId to avoid duplicates
         const groupedItems = {};
-
         order.items.forEach((item) => {
           const pid = item.productId?._id || item.productId;
           if (!groupedItems[pid]) {
             groupedItems[pid] = { ...item };
           } else {
             groupedItems[pid].quantity += item.quantity;
-            groupedItems[pid].price = item.price;
           }
         });
 
         return (
           <div key={order._id} className="order">
             <h3>Order #{order._id}</h3>
-            <p>Status: {order.status}</p>
-            <p>Total: ${Number(order.totalAmount).toFixed(2)}</p>
+            <p>Status: <strong>{order.status}</strong></p>
+            <p>Total: <strong>ETB {Number(order.totalAmount).toFixed(2)}</strong></p>
             <p>Placed on: {new Date(order.createdAt).toLocaleDateString()}</p>
+
             <div className="order-items">
               {Object.values(groupedItems).map((item, index) => {
                 const product = item.productId;
@@ -115,7 +106,7 @@ const Orders = () => {
                     <img
                       src={
                         product?.image
-                          ? `http://localhost:5000${product.image}`
+                          ? `${config.API_BASE_URL}${product.image}`
                           : '/placeholder.jpg'
                       }
                       alt={product?.name || 'Product'}
@@ -126,11 +117,10 @@ const Orders = () => {
                     />
                     <div>
                       <h4>{product?.name || 'Unknown Product'}</h4>
-                      <p>Price: ${Number(item.price).toFixed(2)}</p>
+                      <p>Price: ETB {Number(item.price).toFixed(2)}</p>
                       <p>Quantity: {item.quantity}</p>
                       <p>
-                        Subtotal: $
-                        {(Number(item.price) * Number(item.quantity)).toFixed(2)}
+                        Subtotal: ETB {(Number(item.price) * Number(item.quantity)).toFixed(2)}
                       </p>
                     </div>
                   </div>
@@ -140,6 +130,7 @@ const Orders = () => {
           </div>
         );
       })}
+      {/* Only one ToastContainer here */}
       <ToastContainer />
     </div>
   );

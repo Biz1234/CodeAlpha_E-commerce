@@ -1,7 +1,7 @@
-import { Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
+import { Routes, Route, useLocation } from 'react-router-dom';
 import { useContext } from 'react';
-import { AuthContext } from './context/AuthContext';
-import { CartContext } from './context/CartContext';
+import { AuthContext } from './context/AuthProvider';
+import { CartContext } from './context/CartContext'; 
 import Products from './pages/Products';
 import ProductDetails from './pages/ProductDetails';
 import Cart from './pages/Cart';
@@ -12,96 +12,42 @@ import Orders from './pages/Orders';
 import Profile from './pages/Profile';
 import AdminDashboard from './pages/Admin/AdminDashboard';
 import ProtectedAdminRoute from './components/ProtectedAdminRoute';
-import Footer from './components/Footer'; // ✅ Import Footer component
+import UserLayout from './components/UserLayout';
+import Footer from './components/Footer';
 import './App.css';
-import {
-  FaHome,
-  FaShoppingCart,
-  FaBoxOpen,
-  FaUserCircle,
-  FaSignInAlt,
-  FaRegUser,
-} from 'react-icons/fa';
 
 function App() {
-  const { user, logout } = useContext(AuthContext);
-  const { cart } = useContext(CartContext);
-  const location = useLocation();
-  const navigate = useNavigate();
+  const authContext = useContext(AuthContext);
+  const cartContext = useContext(CartContext);
+  const location = useLocation(); // 👈 get current route
 
-  const handleLogout = () => {
-    logout();
-    navigate('/');
-  };
+  const { user = null } = authContext || {};
+  const { cart = [] } = cartContext || {};
 
-  const cartItemCount = cart.reduce((total, item) => total + item.quantity, 0);
-
-  // ⛔️ Hide navbar and footer on login, register, and admin dashboard
-  const hideUI =
-    location.pathname === '/login' ||
-    location.pathname === '/register' ||
-    location.pathname === '/admin';
+  // Check if current route starts with /admin
+  const isAdminRoute = location.pathname.startsWith('/admin');
 
   return (
     <div className="app-container">
-      {!hideUI && (
-        <>
-          <nav className="navbar">
-            <div className="nav-left">
-              <Link to="/" className="nav-link">
-                <FaHome /> Home
-              </Link>
-              <Link to="/cart" className="nav-link">
-                <FaShoppingCart /> Cart
-                {cartItemCount > 0 && <span className="cart-badge">{cartItemCount}</span>}
-              </Link>
-              <Link to="/orders" className="nav-link">
-                <FaBoxOpen /> Orders
-              </Link>
-              <Link to="/profile" className="nav-link">
-                <FaUserCircle /> Profile
-              </Link>
-            </div>
-            <div className="nav-right">
-              {user ? (
-                <>
-                  <span className="welcome-text">Hi, {user.name}</span>
-                  <button className="logout-btn" onClick={handleLogout}>
-                    <FaSignInAlt /> Logout
-                  </button>
-                  {user.role === 'admin' && (
-                    <Link to="/admin" className="nav-link">
-                      <FaUserCircle /> Admin
-                    </Link>
-                  )}
-                </>
-              ) : (
-                <>
-                  <Link to="/login" className="nav-link">
-                    <FaSignInAlt /> Login
-                  </Link>
-                  <Link to="/register" className="nav-link">
-                    <FaRegUser /> Register
-                  </Link>
-                </>
-              )}
-            </div>
-          </nav>
-
-          <h1 className="page-title">E-commerce Store</h1>
-        </>
+      {/* Render UserLayout only if not admin */}
+      { !isAdminRoute && (
+        <UserLayout>
+          <Routes>
+            <Route path="/" element={<Products />} />
+            <Route path="/product/:id" element={<ProductDetails />} />
+            <Route path="/cart" element={<Cart />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/checkout" element={<Checkout />} />
+            <Route path="/orders" element={<Orders />} />
+            <Route path="/profile" element={<Profile />} />
+          </Routes>
+        </UserLayout>
       )}
 
-      <main className="main-content">
+      {/* Admin routes separate without UserLayout/Footer */}
+      { isAdminRoute && (
         <Routes>
-          <Route path="/" element={<Products />} />
-          <Route path="/product/:id" element={<ProductDetails />} />
-          <Route path="/cart" element={<Cart />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/checkout" element={<Checkout />} />
-          <Route path="/orders" element={<Orders />} />
-          <Route path="/profile" element={<Profile />} />
           <Route
             path="/admin"
             element={
@@ -111,10 +57,10 @@ function App() {
             }
           />
         </Routes>
-      </main>
+      )}
 
-      {/* ✅ Show Footer unless on login/register/admin */}
-      {!hideUI && <Footer />}
+      {/* Footer visible only for non-admin */}
+      { !isAdminRoute && <Footer /> }
     </div>
   );
 }

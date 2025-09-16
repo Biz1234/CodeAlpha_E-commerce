@@ -1,11 +1,22 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { AuthContext } from '../../context/AuthContext';
-import axios from 'axios';
+import { AuthContext } from '../../context/AuthProvider';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { jwtDecode } from 'jwt-decode';
-import '../../styles/AdminDashboard.css';
 import { useNavigate } from 'react-router-dom';
+import {
+  fetchAllOrders,
+  updateOrderStatus,
+  fetchAllProducts,
+  createProduct,
+  updateProduct,
+  deleteProduct,
+  fetchAllBanners,
+  createBanner,
+  updateBanner,
+  deleteBanner,
+} from '../../api';
+import '../../styles/AdminDashboard.css';
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -21,21 +32,28 @@ const AdminDashboard = () => {
   const [editProductId, setEditProductId] = useState(null);
   const [bannerForm, setBannerForm] = useState({ message: '', link: '', expiresAt: '' });
   const [editBannerId, setEditBannerId] = useState(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
-  if (!user || user.role !== 'admin') return <div>Access denied. Admin only.</div>;
+  if (!user || user.role !== 'admin') return <div className="access-denied">Access denied. Admin only.</div>;
 
   useEffect(() => {
     if (token) {
       try {
         const decoded = jwtDecode(token);
         if (decoded.exp * 1000 < Date.now()) {
-          toast.error('Session expired. Please log in again.');
+          toast.error('Session expired. Please log in again.', {
+            position: 'top-right',
+            autoClose: 3000,
+          });
           logout();
           navigate('/login');
           return;
         }
       } catch (err) {
-        toast.error('Invalid token. Please log in again.');
+        toast.error('Invalid token. Please log in again.', {
+          position: 'top-right',
+          autoClose: 3000,
+        });
         logout();
         navigate('/login');
         return;
@@ -47,50 +65,47 @@ const AdminDashboard = () => {
       setError(null);
       try {
         if (activeTab === 'orders') {
-          const res = await axios.get('http://localhost:5000/api/order', {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          setOrders(res.data);
+          const { data } = await fetchAllOrders(token);
+          setOrders(data);
         } else if (activeTab === 'products') {
-          const res = await axios.get('http://localhost:5000/api/products', {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          setProducts(res.data);
+          const { data } = await fetchAllProducts(token);
+          setProducts(data);
         } else if (activeTab === 'banners') {
-          const res = await axios.get('http://localhost:5000/api/banners', {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          setBanners(res.data);
+          const { data } = await fetchAllBanners(token);
+          setBanners(data);
         }
       } catch (err) {
         setError(err.response?.data?.message || `Failed to load ${activeTab}`);
-        toast.error(err.response?.data?.message || `Failed to load ${activeTab}`);
+        toast.error(err.response?.data?.message || `Failed to load ${activeTab}`, {
+          position: 'top-right',
+          autoClose: 3000,
+        });
       } finally {
         setLoading(false);
       }
     };
 
     if (token) fetchData();
-  }, [activeTab, token, logout,navigate]);
+  }, [activeTab, token, logout, navigate]);
 
-const handleLogout = () => {
+  const handleLogout = () => {
     logout();
     navigate('/login');
   };
 
-
-
-  const updateOrderStatus = async (orderId, newStatus) => {
+  const updateOrderStatusHandler = async (orderId, newStatus) => {
     try {
-      const res = await axios.put(
-        `http://localhost:5000/api/order/${orderId}`,
-        { status: newStatus },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      setOrders((prev) => prev.map((order) => (order._id === orderId ? res.data : order)));
-      toast.success('Order status updated');
+      const { data } = await updateOrderStatus(orderId, newStatus, token);
+      setOrders((prev) => prev.map((order) => (order._id === orderId ? data : order)));
+      toast.success('Order status updated', {
+        position: 'top-right',
+        autoClose: 2000,
+      });
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to update status');
+      toast.error(err.response?.data?.message || 'Failed to update status', {
+        position: 'top-right',
+        autoClose: 3000,
+      });
     }
   };
 
@@ -101,37 +116,44 @@ const handleLogout = () => {
     if (image) formData.append('image', image);
     try {
       if (editProductId) {
-        const res = await axios.put(
-          `http://localhost:5000/api/products/${editProductId}`,
-          formData,
-          { headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' } }
-        );
-        setProducts((prev) => prev.map((p) => (p._id === editProductId ? res.data : p)));
-        toast.success('Product updated');
-      } else {
-        const res = await axios.post('http://localhost:5000/api/products', formData, {
-          headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' },
+        const { data } = await updateProduct(editProductId, formData, token);
+        setProducts((prev) => prev.map((p) => (p._id === editProductId ? data : p)));
+        toast.success('Product updated', {
+          position: 'top-right',
+          autoClose: 2000,
         });
-        setProducts([...products, res.data]);
-        toast.success('Product added');
+      } else {
+        const { data } = await createProduct(formData, token);
+        setProducts([...products, data]);
+        toast.success('Product added', {
+          position: 'top-right',
+          autoClose: 2000,
+        });
       }
       setProductForm({ name: '', price: '', description: '', stock: '', category: '' });
       setImage(null);
       setEditProductId(null);
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to save product');
+      toast.error(err.response?.data?.message || 'Failed to save product', {
+        position: 'top-right',
+        autoClose: 3000,
+      });
     }
   };
 
-  const deleteProduct = async (productId) => {
+  const deleteProductHandler = async (productId) => {
     try {
-      await axios.delete(`http://localhost:5000/api/products/${productId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await deleteProduct(productId, token);
       setProducts((prev) => prev.filter((p) => p._id !== productId));
-      toast.success('Product deleted');
+      toast.success('Product deleted', {
+        position: 'top-right',
+        autoClose: 2000,
+      });
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to delete product');
+      toast.error(err.response?.data?.message || 'Failed to delete product', {
+        position: 'top-right',
+        autoClose: 3000,
+      });
     }
   };
 
@@ -139,36 +161,43 @@ const handleLogout = () => {
     e.preventDefault();
     try {
       if (editBannerId) {
-        const res = await axios.put(
-          `http://localhost:5000/api/banners/${editBannerId}`,
-          bannerForm,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        setBanners((prev) => prev.map((b) => (b._id === editBannerId ? res.data : b)));
-        toast.success('Banner updated');
-      } else {
-        const res = await axios.post('http://localhost:5000/api/banners', bannerForm, {
-          headers: { Authorization: `Bearer ${token}` },
+        const { data } = await updateBanner(editBannerId, bannerForm, token);
+        setBanners((prev) => prev.map((b) => (b._id === editBannerId ? data : b)));
+        toast.success('Banner updated', {
+          position: 'top-right',
+          autoClose: 2000,
         });
-        setBanners([...banners, res.data]);
-        toast.success('Banner added');
+      } else {
+        const { data } = await createBanner(bannerForm, token);
+        setBanners([...banners, data]);
+        toast.success('Banner added', {
+          position: 'top-right',
+          autoClose: 2000,
+        });
       }
       setBannerForm({ message: '', link: '', expiresAt: '' });
       setEditBannerId(null);
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to save banner');
+      toast.error(err.response?.data?.message || 'Failed to save banner', {
+        position: 'top-right',
+        autoClose: 3000,
+      });
     }
   };
 
-  const deleteBanner = async (bannerId) => {
+  const deleteBannerHandler = async (bannerId) => {
     try {
-      await axios.delete(`http://localhost:5000/api/banners/${bannerId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await deleteBanner(bannerId, token);
       setBanners((prev) => prev.filter((b) => b._id !== bannerId));
-      toast.success('Banner deleted');
+      toast.success('Banner deleted', {
+        position: 'top-right',
+        autoClose: 2000,
+      });
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to delete banner');
+      toast.error(err.response?.data?.message || 'Failed to delete banner', {
+        position: 'top-right',
+        autoClose: 3000,
+      });
     }
   };
 
@@ -193,219 +222,247 @@ const handleLogout = () => {
     setEditBannerId(banner._id);
   };
 
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
+
   return (
     <div className="admin-dashboard">
+      <div className={`sidebar ${isSidebarOpen ? 'open' : 'closed'}`}>
+        <div className="sidebar-header">
+          <h3>Admin Panel</h3>
+          <button className="sidebar-toggle" onClick={toggleSidebar}>
+            <i className={`fas ${isSidebarOpen ? 'fa-chevron-left' : 'fa-chevron-right'}`}></i>
+          </button>
+        </div>
+        <nav className="sidebar-nav">
+          <button
+            onClick={() => setActiveTab('orders')}
+            className={activeTab === 'orders' ? 'active' : ''}
+          >
+            <i className="fas fa-box icon"></i>
+            {isSidebarOpen && <span>Orders</span>}
+          </button>
+          <button
+            onClick={() => setActiveTab('products')}
+            className={activeTab === 'products' ? 'active' : ''}
+          >
+            <i className="fas fa-shopping-cart icon"></i>
+            {isSidebarOpen && <span>Products</span>}
+          </button>
+          <button
+            onClick={() => setActiveTab('banners')}
+            className={activeTab === 'banners' ? 'active' : ''}
+          >
+            <i className="fas fa-bullhorn icon"></i>
+            {isSidebarOpen && <span>Banners</span>}
+          </button>
+          <button onClick={handleLogout} className="sidebar-logout">
+            <i className="fas fa-sign-out-alt icon"></i>
+            {isSidebarOpen && <span>Logout</span>}
+          </button>
+        </nav>
+      </div>
+      <div className={`main-content ${isSidebarOpen ? 'sidebar-open' : 'sidebar-closed'}`}>
         <div className="admin-topbar">
-        <h2>Welcome, {user.name} (Admin)</h2>
-        <button className="admin-logout-btn" onClick={handleLogout}>
-          Logout
-        </button>
+          <h2>Welcome {user.name}</h2>
+        </div>
+
+        {loading && <div className="loading">Loading...</div>}
+        {error && <div className="error">{error}</div>}
+
+        {activeTab === 'orders' && (
+          <div>
+            <h3>Manage Orders</h3>
+            {orders.length === 0 ? (
+              <p>No orders found.</p>
+            ) : (
+              <table className="orders-table">
+                <thead>
+                  <tr>
+                    <th>Order ID</th>
+                    <th>User</th>
+                    <th>Total</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {orders.map((order) => (
+                    <tr key={order._id}>
+                      <td>{order._id}</td>
+                      <td>{order.userId?.name || 'Unknown User'}</td>
+                      <td>ETB {order.totalAmount.toFixed(2)}</td>
+                      <td>{order.status}</td>
+                      <td>{new Date(order.createdAt).toLocaleDateString()}</td>
+                      <td>
+                        <select
+                          defaultValue={order.status}
+                          onChange={(e) => updateOrderStatusHandler(order._id, e.target.value)}
+                        >
+                          <option value="pending">Pending</option>
+                          <option value="processing">Processing</option>
+                          <option value="shipped">Shipped</option>
+                          <option value="delivered">Delivered</option>
+                          <option value="cancelled">Cancelled</option>
+                        </select>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        )}
+
+        {activeTab === 'products' && (
+          <div>
+            <h3>Manage Products</h3>
+            <form onSubmit={handleProductSubmit}>
+              <input
+                type="text"
+                value={productForm.name}
+                onChange={(e) => setProductForm({ ...productForm, name: e.target.value })}
+                placeholder="Product Name"
+                required
+              />
+              <input
+                type="text"
+                value={productForm.price}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (/^\d*\.?\d{0,2}$/.test(value)) {
+                    setProductForm({ ...productForm, price: value });
+                  }
+                }}
+                placeholder="Price (e.g. 99.99)"
+                required
+              />
+              <textarea
+                value={productForm.description}
+                onChange={(e) => setProductForm({ ...productForm, description: e.target.value })}
+                placeholder="Description"
+                required
+              />
+              <input
+                type="number"
+                value={productForm.stock}
+                onChange={(e) => setProductForm({ ...productForm, stock: e.target.value })}
+                placeholder="Stock"
+                required
+                min="0"
+              />
+              <input
+                type="text"
+                value={productForm.category}
+                onChange={(e) => setProductForm({ ...productForm, category: e.target.value })}
+                placeholder="Category"
+                required
+              />
+              <input
+                type="file"
+                onChange={(e) => setImage(e.target.files[0])}
+                accept="image/jpeg,image/png"
+                required={!editProductId}
+              />
+              <button type="submit">{editProductId ? 'Update Product' : 'Add Product'}</button>
+            </form>
+            <h4>Product List</h4>
+            {products.length === 0 ? (
+              <p>No products found.</p>
+            ) : (
+              <table>
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Price</th>
+                    <th>Stock</th>
+                    <th>Category</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {products.map((product) => (
+                    <tr key={product._id}>
+                      <td>{product.name}</td>
+                      <td>ETB {product.price.toFixed(2)}</td>
+                      <td>{product.stock}</td>
+                      <td>{product.category}</td>
+                      <td>
+                        <button onClick={() => editProduct(product)}>Edit</button>
+                        <button className="del" onClick={() => deleteProductHandler(product._id)}>
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        )}
+
+        {activeTab === 'banners' && (
+          <div>
+            <h3>Manage Banners</h3>
+            <form onSubmit={handleBannerSubmit}>
+              <input
+                type="text"
+                value={bannerForm.message}
+                onChange={(e) => setBannerForm({ ...bannerForm, message: e.target.value })}
+                placeholder="Banner Message"
+                required
+              />
+              <input
+                type="text"
+                value={bannerForm.link}
+                onChange={(e) => setBannerForm({ ...bannerForm, link: e.target.value })}
+                placeholder="Link (e.g., /products)"
+              />
+              <input
+                type="datetime-local"
+                value={bannerForm.expiresAt}
+                onChange={(e) => setBannerForm({ ...bannerForm, expiresAt: e.target.value })}
+                placeholder="Expiration Date"
+              />
+              <button type="submit">{editBannerId ? 'Update Banner' : 'Add Banner'}</button>
+            </form>
+            <h4>Banner List</h4>
+            {banners.length === 0 ? (
+              <p>No banners found.</p>
+            ) : (
+              <table>
+                <thead>
+                  <tr>
+                    <th>Message</th>
+                    <th>Link</th>
+                    <th>Active</th>
+                    <th>Expires</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {banners.map((banner) => (
+                    <tr key={banner._id}>
+                      <td>{banner.message}</td>
+                      <td>{banner.link}</td>
+                      <td>{banner.isActive ? 'Yes' : 'No'}</td>
+                      <td>{banner.expiresAt ? new Date(banner.expiresAt).toLocaleString() : '-'}</td>
+                      <td>
+                        <button onClick={() => editBanner(banner)}>Edit</button>
+                        <button className="del" onClick={() => deleteBannerHandler(banner._id)}>
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        )}
       </div>
-      <div className="tabs">
-        <button onClick={() => setActiveTab('orders')} className={activeTab === 'orders' ? 'active' : ''}>
-          Orders
-        </button>
-        <button onClick={() => setActiveTab('products')} className={activeTab === 'products' ? 'active' : ''}>
-          Products
-        </button>
-        <button onClick={() => setActiveTab('banners')} className={activeTab === 'banners' ? 'active' : ''}>
-          Banners
-        </button>
-      </div>
-
-      {loading && <div>Loading...</div>}
-      {error && <div className="error">{error}</div>}
-
-      {activeTab === 'orders' && (
-        <div>
-          <h3>Manage Orders</h3>
-          {orders.length === 0 ? (
-            <p>No orders found.</p>
-          ) : (
-            <table className="orders-table">
-              <thead>
-                <tr>
-                  <th>Order ID</th>
-                  <th>User</th>
-                  <th>Total</th>
-                  <th>Status</th>
-                  <th>Date</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {orders.map((order) => (
-                  <tr key={order._id}>
-                    <td>{order._id}</td>
-                    <td>{order.userId?.name || 'Unknown User'}</td>
-                    <td>${order.totalAmount.toFixed(2)}</td>
-                    <td>{order.status}</td>
-                    <td>{new Date(order.createdAt).toLocaleDateString()}</td>
-                    <td>
-                      <select
-                        defaultValue={order.status}
-                        onChange={(e) => updateOrderStatus(order._id, e.target.value)}
-                      >
-                        <option value="pending">Pending</option>
-                        <option value="processing">Processing</option>
-                        <option value="shipped">Shipped</option>
-                        <option value="delivered">Delivered</option>
-                        <option value="cancelled">Cancelled</option>
-                      </select>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </div>
-      )}
-
-      {activeTab === 'products' && (
-        <div>
-          <h3>Manage Products</h3>
-          <form onSubmit={handleProductSubmit}>
-            <input
-              type="text"
-              value={productForm.name}
-              onChange={(e) => setProductForm({ ...productForm, name: e.target.value })}
-              placeholder="Product Name"
-              required
-            />
-            <input
-  type="text"
-  value={productForm.price}
-  onChange={(e) => {
-    const value = e.target.value;
-   
-    if (/^\d*\.?\d{0,2}$/.test(value)) {
-      setProductForm({ ...productForm, price: value });
-    }
-  }}
-  placeholder="Price (e.g., 99.99)"
-  required
-/>
-
-            <textarea
-              value={productForm.description}
-              onChange={(e) => setProductForm({ ...productForm, description: e.target.value })}
-              placeholder="Description"
-              required
-            />
-            <input
-              type="number"
-              value={productForm.stock}
-              onChange={(e) => setProductForm({ ...productForm, stock: e.target.value })}
-              placeholder="Stock"
-              required
-              min="0"
-            />
-            <input
-              type="text"
-              value={productForm.category}
-              onChange={(e) => setProductForm({ ...productForm, category: e.target.value })}
-              placeholder="Category"
-              required
-            />
-            <input
-              type="file"
-              onChange={(e) => setImage(e.target.files[0])}
-              accept="image/jpeg,image/png"
-              required={!editProductId}
-            />
-            <button type="submit">{editProductId ? 'Update Product' : 'Add Product'}</button>
-          </form>
-          <h4>Product List</h4>
-          {products.length === 0 ? (
-            <p>No products found.</p>
-          ) : (
-            <table>
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Price</th>
-                  <th>Stock</th>
-                  <th>Category</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {products.map((product) => (
-                  <tr key={product._id}>
-                    <td>{product.name}</td>
-                    <td>${product.price.toFixed(2)}</td>
-                    <td>{product.stock}</td>
-                    <td>{product.category}</td>
-                    <td>
-                      <button onClick={() => editProduct(product)}>Edit</button>
-                      <button onClick={() => deleteProduct(product._id)}>Delete</button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </div>
-      )}
-
-      {activeTab === 'banners' && (
-        <div>
-          <h3>Manage Banners</h3>
-          <form onSubmit={handleBannerSubmit}>
-            <input
-              type="text"
-              value={bannerForm.message}
-              onChange={(e) => setBannerForm({ ...bannerForm, message: e.target.value })}
-              placeholder="Banner Message"
-              required
-            />
-            <input
-              type="text"
-              value={bannerForm.link}
-              onChange={(e) => setBannerForm({ ...bannerForm, link: e.target.value })}
-              placeholder="Link (e.g., /products)"
-            />
-            <input
-              type="datetime-local"
-              value={bannerForm.expiresAt}
-              onChange={(e) => setBannerForm({ ...bannerForm, expiresAt: e.target.value })}
-              placeholder="Expiration Date"
-            />
-            <button type="submit">{editBannerId ? 'Update Banner' : 'Add Banner'}</button>
-          </form>
-          <h4>Banner List</h4>
-          {banners.length === 0 ? (
-            <p>No banners found.</p>
-          ) : (
-            <table>
-              <thead>
-                <tr>
-                  <th>Message</th>
-                  <th>Link</th>
-                  <th>Active</th>
-                  <th>Expires</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {banners.map((banner) => (
-                  <tr key={banner._id}>
-                    <td>{banner.message}</td>
-                    <td>{banner.link}</td>
-                    <td>{banner.isActive ? 'Yes' : 'No'}</td>
-                    <td>{banner.expiresAt ? new Date(banner.expiresAt).toLocaleString() : '-'}</td>
-                    <td>
-                      <button onClick={() => editBanner(banner)}>Edit</button>
-                      <button onClick={() => deleteBanner(banner._id)}>Delete</button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </div>
-      )}
-
       <ToastContainer />
     </div>
   );
