@@ -7,20 +7,22 @@ const bannerRoutes = require('./routes/banner');
 
 const app = express();
 
-// CORS configuration
-const allowedOrigins = ['https://e-commerce-1-p0ho.onrender.com'];
+// ✅ Allowed origins (add all environments here)
+const allowedOrigins = [
+  'http://localhost:3000', // React local dev
+  'https://e-commerce-1-p0ho.onrender.com' // Deployed frontend
+];
 
 app.use(cors({
-  origin: function(origin, callback) {
-    // allow requests with no origin (like Postman)
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.indexOf(origin) === -1) {
-      const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
-      return callback(new Error(msg), false);
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true); // allow non-browser tools like Postman
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    } else {
+      return callback(new Error('The CORS policy for this site does not allow access from the specified Origin.'), false);
     }
-    return callback(null, true);
   },
-  credentials: true, 
+  credentials: true
 }));
 
 app.use(express.json());
