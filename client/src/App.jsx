@@ -19,7 +19,7 @@ import './App.css';
 function App() {
   const authContext = useContext(AuthContext);
   const cartContext = useContext(CartContext);
-  const location = useLocation(); // 👈 get current route
+  const location = useLocation(); 
 
   const { user = null } = authContext || {};
   const { cart = [] } = cartContext || {};

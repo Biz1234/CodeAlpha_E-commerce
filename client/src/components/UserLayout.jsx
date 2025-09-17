@@ -161,7 +161,7 @@ const UserLayout = ({ children }) => {
       ></div>
 
       <main className="main-content">
-        <h1 className="page-title">E-commerce Store</h1>
+        {/* <h1 className="page-title">E-Store</h1> */}
         {children}
       </main>
     </div>

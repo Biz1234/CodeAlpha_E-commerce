@@ -1,4 +1,3 @@
-
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { AuthContext } from './AuthProvider';
@@ -9,11 +8,10 @@ export const CartContext = createContext();
 export const CartProvider = ({ children }) => {
   const { user, token } = useContext(AuthContext);
 
+  // Normalize and filter cart items
   const normalizeCartItems = (items) => {
-    if (!Array.isArray(items)) {
-      console.warn('Cart items is not an array:', items);
-      return [];
-    }
+    if (!Array.isArray(items)) return [];
+
     return items
       .map((item) => {
         let productId = null;
@@ -34,10 +32,8 @@ export const CartProvider = ({ children }) => {
           productData = item.product;
         }
 
-        if (!productId || !price) {
-          console.warn('Invalid cart item - missing productId or price:', item);
-          return null;
-        }
+        // Only return valid items
+        if (!productId || price === null) return null;
 
         return {
           itemId: item.itemId || uuidv4(),
@@ -47,9 +43,10 @@ export const CartProvider = ({ children }) => {
           price,
         };
       })
-      .filter((item) => item !== null);
+      .filter((item) => item !== null); // remove invalid items
   };
 
+  // Cart state
   const [cart, setCart] = useState(() => {
     const savedCart = localStorage.getItem('cart');
     try {
@@ -61,6 +58,7 @@ export const CartProvider = ({ children }) => {
     }
   });
 
+  // Session ID for guest users
   const [sessionId] = useState(() => {
     const stored = localStorage.getItem('sessionId');
     const newId = stored || uuidv4();
@@ -68,10 +66,12 @@ export const CartProvider = ({ children }) => {
     return newId;
   });
 
+  // Persist cart to localStorage
   useEffect(() => {
     localStorage.setItem('cart', JSON.stringify(cart));
   }, [cart]);
 
+  // Fetch or merge cart when user logs in
   useEffect(() => {
     const fetchOrSyncCart = async () => {
       if (!user || !token) return;
@@ -94,11 +94,9 @@ export const CartProvider = ({ children }) => {
     fetchOrSyncCart();
   }, [user, token, sessionId]);
 
+  // Add item to cart
   const addToCartItem = async (product, quantity = 1) => {
-    if (!product._id || !product.price) {
-      console.warn('Cannot add to cart - missing product _id or price:', product);
-      return;
-    }
+    if (!product?._id || product.price === undefined) return; // ignore invalid products
 
     try {
       const { data } = await addToCart(product._id, quantity, product.price, sessionId, token);
@@ -109,6 +107,7 @@ export const CartProvider = ({ children }) => {
     }
   };
 
+  // Update quantity
   const updateQuantity = async (productId, quantity) => {
     try {
       const { data } = await updateCartQuantity(productId, quantity, sessionId, token);
@@ -123,6 +122,7 @@ export const CartProvider = ({ children }) => {
     }
   };
 
+  // Remove item from cart
   const removeFromCartItem = async (productId) => {
     try {
       const { data } = await removeFromCart(productId, sessionId, token);
@@ -133,6 +133,7 @@ export const CartProvider = ({ children }) => {
     }
   };
 
+  // Clear cart completely
   const clearCart = () => {
     setCart([]);
     localStorage.removeItem('cart');
