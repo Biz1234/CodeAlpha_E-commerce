@@ -2,7 +2,7 @@
 
 const mongoose = require('mongoose');
 require('dotenv').config();
-const Product = require('./models/Product');
+const Product = require('./models/product');
 
 
 mongoose.connect(process.env.MONGO_URI)

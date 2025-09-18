@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const Cart = require('../models/Cart');
-const Product = require('../models/Product');
+const Product = require('../models/product');
 
 // 🔐 Middleware to verify JWT and set req.userId
 const authMiddleware = (req, res, next) => {
