@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const Product = require('../models/Product'); // Fixed typo: 'models svalids' → 'models'
+const Product = require('../models/Product'); 
 const { authMiddleware, adminMiddleware } = require('../middleware/authMiddleware');
 const multer = require('multer');
 const path = require('path');
@@ -39,7 +39,7 @@ router.post('/', authMiddleware, adminMiddleware, upload.single('image'), async 
       return res.status(400).json({ message: 'Image is required' });
     }
 
-    const image = `/uploads/${req.file.filename}`; // This will work with express.static in server.js
+    const image = `/uploads/${req.file.filename}`; 
 
     const product = await Product.create({
       name,
