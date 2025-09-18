@@ -17,7 +17,7 @@ const Register = () => {
     e.preventDefault();
     try {
       await register(formData.name, formData.email, formData.password);
-      navigate('/cart');
+      navigate('/');
     } catch (err) {
       setError(err.message);
     }
