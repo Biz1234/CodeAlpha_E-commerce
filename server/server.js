@@ -7,15 +7,15 @@ const bannerRoutes = require('./routes/banner');
 
 const app = express();
 
-// ✅ Allowed origins (add all environments here)
+
 const allowedOrigins = [
-  'http://localhost:3000', // React local dev
-  'https://e-commerce-1-p0ho.onrender.com' // Deployed frontend
-];
+  'http://localhost:5173', 
+  'https://e-commerce-1-p0ho.onrender.com' ,
+  'https://codealpha-e-commerce-rgdm.onrender.com'];
 
 app.use(cors({
   origin: function (origin, callback) {
-    if (!origin) return callback(null, true); // allow non-browser tools like Postman
+    if (!origin) return callback(null, true); 
     if (allowedOrigins.includes(origin)) {
       return callback(null, true);
     } else {
