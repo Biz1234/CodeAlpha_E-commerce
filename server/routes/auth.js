@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
-const { authMiddleware, adminMiddleware } = require('../middleware/authmiddleware');
+const { authMiddleware, adminMiddleware } = require('../middleware/authMiddleware');
 
 // POST register
 router.post('/register', async (req, res) => {
